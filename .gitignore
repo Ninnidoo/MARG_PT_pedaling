@@ -31,3 +31,5 @@ logs/*
 *.bin
 *.wav
 *.flac
+
+third_party/PianistTransformer/
