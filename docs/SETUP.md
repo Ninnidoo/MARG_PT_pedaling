@@ -58,13 +58,9 @@ These steps are derived from the official README and local source inspection. On
 - Training configs use `bf16` and `wandb`; these are not needed for first pretrained inference.
 - Paths in official scripts are relative and assume commands are run from the `third_party/PianistTransformer` repository root.
 
-### Not Yet Done
+### Status at Initial Repository Analysis
 
-- Python environment creation has not been performed.
-- Packages have not been installed.
-- Checkpoints have not been downloaded.
-- Model inference has not been executed.
-- Third-party source code has not been modified.
+At the initial repository-analysis step, before the Colab smoke test, Python environment creation, package installation, checkpoint download, and model inference had not yet been performed. Third-party source code was not modified.
 
 ## Local CPU vs Colab GPU Execution Plan
 
@@ -277,8 +273,8 @@ Colab GPU path, to run later:
 - Official script does not use GPU as written; GPU use requires a notebook wrapper or a documented source change later.
 - Local CPU bfloat16 behavior is untested.
 - Dependency installation has not been attempted on either path.
-- Checkpoint download has not been attempted.
-- No inference output has been generated in this project session.
+- Checkpoint download and inference have now succeeded once in Google Colab GPU using `yhj137/pianist-transformer-rendering`.
+- The verified Colab output was `/content/output_midi/0.mid`; `/content` remains temporary, so important outputs must be downloaded or saved to Google Drive.
 
 ## Execution Strategy Decision
 
@@ -297,8 +293,39 @@ Artifact prepared:
 
 - `notebooks/pianist_transformer_colab_inference.ipynb`
 
-Not yet done:
+Updated status after first Colab smoke test:
 
-- The notebook has not been executed in Colab.
-- No checkpoint has been downloaded.
-- No inference output has been generated.
+- The Colab GPU notebook workflow has been executed successfully once.
+- The official checkpoint `yhj137/pianist-transformer-rendering` was used in Colab.
+- A rendered output MIDI was generated at `/content/output_midi/0.mid`.
+
+## Verified Colab GPU Baseline Inference
+
+Date: 2026-07-10
+
+The first official pretrained Pianist Transformer inference reproduction has been verified on Google Colab GPU.
+
+### Verified Run
+
+- Runtime: Google Colab GPU
+- Input MIDI: `/content/PianistTransformer/data/midis/testset/score/3.mid`
+- Output MIDI: `/content/output_midi/0.mid`
+- Repository commit: `747df2d12291e37f6638b39f1b71517e579ad48c`
+- Checkpoint: `yhj137/pianist-transformer-rendering`
+- Device: `cuda`
+- dtype: `torch.bfloat16`
+- Temperature: `1.0`
+- Top-p: `0.95`
+- Inference time: 66.26 seconds
+- Generated token count: 4192
+- Output size: 6661 bytes
+- Instrument count: 1
+- Note count: 524
+- CC64 sustain pedal event count: 6
+
+### Status Update
+
+- Colab GPU is now verified as the primary path for pretrained inference reproduction.
+- Local Windows CPU remains a secondary fallback and has not been verified for inference.
+- Files under `/content` are temporary; important outputs must be downloaded or saved to Google Drive.
+- The first smoke-test example was musically playable in MuseScore, but it is not a strong repedaling-analysis candidate because it has only 6 CC64 sustain-pedal events.

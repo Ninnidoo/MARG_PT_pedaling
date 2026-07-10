@@ -1,23 +1,27 @@
-# Project Overview
+﻿# Project Overview
 
 This repository is for a two-month research project using Pianist Transformer
 as a baseline for sustain-pedal and repedaling refinement.
 
-The immediate goal is to reproduce pretrained Pianist Transformer inference.
-The later goal is to analyze generated pedal events and develop a lightweight
-repedaling refinement system.
+The immediate goal was to reproduce pretrained Pianist Transformer inference.
+That baseline inference reproduction has now been completed once on Google
+Colab GPU using the official pretrained checkpoint. The next goal is to build a
+baseline experiment workflow and analyze generated pedal events, especially for
+repedaling refinement.
 
 # Current Stage
 
-The project is currently in the environment setup and baseline reproduction stage.
+Baseline inference reproduction completed. The project is now in the baseline
+experiment workflow and pedal analysis stage.
 
 Priorities:
 
-1. Build a clean and reproducible local environment.
-2. Run the official pretrained Pianist Transformer inference example.
-3. Generate and inspect an output MIDI file.
-4. Document every successful command and unresolved issue.
-5. Do not begin model training until inference has been verified.
+1. Preserve the successful Colab GPU inference workflow as the baseline path.
+2. Run additional baseline inference examples with better pedal coverage.
+3. Generate and inspect output MIDI files, with special attention to CC64 sustain-pedal events.
+4. Compare generated pedal behavior against score/performance references.
+5. Document every successful command, experiment parameter, output path, and unresolved issue.
+6. Do not begin model training until the baseline experiment workflow and pedal analysis questions are clear.
 
 # Repository Structure
 
@@ -53,6 +57,11 @@ Priorities:
 - Prefer small, reversible changes over large rewrites.
 - Do not silently upgrade or replace dependencies.
 - Explain the reason before changing Python, PyTorch, CUDA, or package versions.
+- GPU inference and model training use Google Colab.
+- Local VS Code repository is the source of truth for code and documentation.
+- Important Colab outputs must be downloaded or saved to Google Drive.
+- Files under `/content` must be treated as temporary.
+- Every experiment should record seed, input, model commit, checkpoint, generation parameters, runtime, and output path.
 
 # Documentation Rules
 
