@@ -3,25 +3,25 @@
 This repository is for a two-month research project using Pianist Transformer
 as a baseline for sustain-pedal and repedaling refinement.
 
-The immediate goal was to reproduce pretrained Pianist Transformer inference.
-That baseline inference reproduction has now been completed once on Google
-Colab GPU using the official pretrained checkpoint. The next goal is to build a
-baseline experiment workflow and analyze generated pedal events, especially for
-repedaling refinement.
+The initial environment setup and baseline inference reproduction have been
+completed. The official Pianist Transformer checkpoint was verified on Google
+Colab GPU, and the next goal is to refine the research question, analyze
+baseline pedal behavior, and design repedaling-focused data.
 
 # Current Stage
 
-Baseline inference reproduction completed. The project is now in the baseline
-experiment workflow and pedal analysis stage.
+Environment setup and baseline inference reproduction completed.
+Next stage is research question refinement, baseline pedal behavior analysis,
+and repedaling data design.
 
 Priorities:
 
-1. Preserve the successful Colab GPU inference workflow as the baseline path.
-2. Run additional baseline inference examples with better pedal coverage.
-3. Generate and inspect output MIDI files, with special attention to CC64 sustain-pedal events.
-4. Compare generated pedal behavior against score/performance references.
-5. Document every successful command, experiment parameter, output path, and unresolved issue.
-6. Do not begin model training until the baseline experiment workflow and pedal analysis questions are clear.
+1. Preserve the successful Colab GPU smoke-test notebook as the verified reference workflow.
+2. Use the repeated experiment notebook for baseline pedal-behavior probes.
+3. Select pedal-heavy score MIDI examples before drawing repedaling conclusions.
+4. Generate and inspect output MIDI files, with special attention to CC64 sustain-pedal events.
+5. Record seed, input, model commit, checkpoint, generation parameters, runtime, and output path for every experiment.
+6. Do not begin model training until the research question, annotation protocol, and dataset scope are clearer.
 
 # Repository Structure
 
@@ -49,6 +49,7 @@ Priorities:
 - Do not hard-code machine-specific absolute paths in source code.
 - Prefer relative paths or configuration files.
 - Keep the official Pianist Transformer repository under `third_party/`.
+- `third_party/PianistTransformer/` is ignored by the parent Git repository.
 - Avoid modifying third-party source code unless necessary.
 - If third-party code must be changed, document exactly why and what changed.
 - Put original research code under `src/` or `scripts/`.
@@ -59,9 +60,16 @@ Priorities:
 - Explain the reason before changing Python, PyTorch, CUDA, or package versions.
 - GPU inference and model training use Google Colab.
 - Local VS Code repository is the source of truth for code and documentation.
+- ChatGPT helps with research direction, methodology, step planning, and Codex prompt drafting.
+- Codex creates and updates local project files and notebooks from the agreed prompts.
 - Important Colab outputs must be downloaded or saved to Google Drive.
 - Files under `/content` must be treated as temporary.
-- Every experiment should record seed, input, model commit, checkpoint, generation parameters, runtime, and output path.
+- Google Drive path `/content/drive/MyDrive/MARG_research` is the default persistent Colab storage root.
+- Git commits are performed manually by the user from the local Windows terminal.
+- Do not interpret exploratory pedal metrics as final research conclusions.
+- Do not define repedaling labels before the annotation protocol is finalized.
+- Preserve the smoke-test notebook as a verified reference workflow.
+- Experimental notebook changes must not break the verified baseline workflow.
 
 # Documentation Rules
 
