@@ -1,0 +1,5 @@
+definition,high_threshold,low_threshold,max_duration_ms,total_raw_repedal_count,total_preserved,total_lost,micro_average_recall,per_file_recall_mean,per_file_recall_median,files_with_raw_repedal,files_without_raw_repedal,operational_threshold_definition
+A,96,31,300,32,18,14,0.5625,0.5625,0.5625,1,0,True
+B,96,47,300,40,31,9,0.775,0.775,0.775,1,0,True
+C,80,31,300,45,29,16,0.6444444444444445,0.6444444444444445,0.6444444444444445,1,0,True
+D,96,31,500,37,25,12,0.6756756756756757,0.6756756756756757,0.6756756756756757,1,0,True

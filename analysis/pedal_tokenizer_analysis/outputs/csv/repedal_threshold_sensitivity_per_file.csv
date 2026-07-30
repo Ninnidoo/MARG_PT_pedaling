@@ -1,0 +1,5 @@
+file,composer,definition,high_threshold,low_threshold,max_duration_ms,raw_repedal_count,token_repedal_count,preserved_repedal_count,lost_repedal_count,matched_token_repedal_count,repedal_recall,repedal_precision
+C:\Users\eagle\MARG_research\third_party\PianistTransformer\data\midis\asap-dataset-master\Bach\Fugue\bwv_846\Shi05M.mid,Bach,A,96,31,300,32,20,18,14,18,0.5625,0.9
+C:\Users\eagle\MARG_research\third_party\PianistTransformer\data\midis\asap-dataset-master\Bach\Fugue\bwv_846\Shi05M.mid,Bach,B,96,47,300,40,33,31,9,31,0.775,0.9393939393939394
+C:\Users\eagle\MARG_research\third_party\PianistTransformer\data\midis\asap-dataset-master\Bach\Fugue\bwv_846\Shi05M.mid,Bach,C,80,31,300,45,30,29,16,29,0.6444444444444445,0.9666666666666667
+C:\Users\eagle\MARG_research\third_party\PianistTransformer\data\midis\asap-dataset-master\Bach\Fugue\bwv_846\Shi05M.mid,Bach,D,96,31,500,37,26,25,12,25,0.6756756756756757,0.9615384615384616

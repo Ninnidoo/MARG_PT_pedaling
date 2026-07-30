@@ -11,6 +11,8 @@
 | 2026-07-10 | Official Example Smoke Test | Colab GPU notebook using official Pianist Transformer classes/functions | Success | First official pretrained checkpoint inference succeeded on Google Colab GPU. Details below. |
 | 2026-07-10 | Create repeated baseline experiment notebook | `notebooks/02_pianist_transformer_experiments.ipynb` | Prepared | Notebook supports Drive storage, upload/Drive MIDI input, seeds, repeated samples, pedal metrics, JSON metadata, and CSV pedal-event tables. |
 | 2026-07-10 | Repeated experiment workflow verification | `notebooks/02_pianist_transformer_experiments.ipynb` in Google Colab | Success | Google Drive mount, persistent saving, input upload, seed setting, repeated inference, pedal analysis, metadata JSON, and CSV save workflow were verified. |
+| 2026-07-27 | Human reference pedal-tokenizer information-loss batch | `C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe analysis\pedal_tokenizer_analysis\analyze_human_batch.py` | Success | Inventoried 166 repository-provided human reference MIDI files, excluded only `3-1.mid` for no CC64, and analyzed 165/165 with no per-file failures. No model prediction or training. |
+| 2026-07-28 | Stage 2 event-based pedal target audit | `C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe scripts\analyze_stage2_pedal_targets.py` | Success | Analyzed raw CC64 in 165/166 human MIDI files with tempo-aware IOIs, two-slot coverage, tau, time-weighted depth, crossing-noise, and hysteresis sensitivity. No tokenizer, prediction, training, GPU, or new package installation. |
 
 ## Official Example Smoke Test
 
@@ -88,3 +90,124 @@ This is recorded only as a future baseline-analysis target. The cause of the dif
 - Local source of truth: VS Code repository at `C:\Users\eagle\MARG_research`
 - Git commits: manual from local Windows terminal by the user
 - Next stage: research question refinement, baseline pedal behavior analysis, and repedaling data design
+
+## Human Reference Pedal-Tokenizer Batch
+
+Date: 2026-07-27
+
+### Purpose
+
+Measure pedal depth, repedal gesture, and transition timing information retained
+by the official Pianist Transformer tokenizer on repository-provided human
+ground-truth/reference performance MIDI.
+
+### Verified Execution
+
+```powershell
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' 'analysis\pedal_tokenizer_analysis\analyze_human_batch.py'
+```
+
+- Input files inventoried: 166
+- Files analyzed: 165
+- Excluded: `3-1.mid`, no CC64 events
+- Per-file failures: 0
+- Model inference, prediction, and training: not run
+- Random seed: 20260727
+- Bootstrap iterations: 2000
+- Comparison grid: 10 ms
+
+### Key Results
+
+- Raw CC64 events: 659,048
+- Raw repedal candidates: 15,549
+- Preserved repedals: 13,256
+- Lost repedals: 2,293
+- Micro repedal recall: 0.8525
+- Macro repedal recall: 0.8288
+- Mean/median CC64 NMAE: 0.0511 / 0.0419
+- Matched/unmatched raw transitions: 76,630 / 4,272
+- Transition median/p90/p95 absolute error: 16 / 92 / 139 ms
+- IOI-bin repedal recall decreased from 0.9653 below 100 ms to 0.0731
+  at or above 1000 ms.
+
+### Artifacts
+
+- Full report: `analysis/pedal_tokenizer_analysis/HUMAN_BATCH_REPORT.md`
+- CSV: `outputs/csv/human_*`
+- Figures: `outputs/figures/pedal_tokenizer_analysis/human_*`
+- Validation: `outputs/csv/human_validation_report.json`
+
+## Stage 2 Event-Based Pedal Target Audit
+
+Date: 2026-07-28
+
+### Purpose
+
+Measure whether at most two UP/DOWN transition slots per unique-note-onset IOI
+can represent raw human sustain-pedal behavior, and audit event-time, ON-depth,
+crossing, and hysteresis label choices before model implementation.
+
+### Verified Execution
+
+```powershell
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' -m unittest discover -s tests -p 'test_stage2_pedal_targets.py' -v
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' 'scripts\analyze_stage2_pedal_targets.py'
+```
+
+- Python: 3.11.2
+- mido / numpy / matplotlib: 1.3.3 / 1.26.4 / 3.8.4
+- New packages installed: none
+- Synthetic tests: 11 passed
+- Input files: 166
+- Analyzed: 165
+- Excluded: `3-1.mid`, no CC64
+- Parsing/analysis failures: 0
+- Raw CC64: 659,048, all on channel 0
+- Tokenizer, model prediction, training, GPU/CUDA: not used
+
+### Key Results
+
+- Unique-onset IOIs: 562,605
+- IOIs with 0 / 1 / 2 / 3 / 4+ transitions:
+  494,743 / 56,019 / 11,146 / 501 / 196
+- Two-slot lossless coverage: 0.998761
+- Overflow IOIs: 697
+- Main-IOI UP / DOWN transitions: 40,289 / 40,309
+- Combined slot NONE / UP / DOWN:
+  1,045,505 / 39,722 / 39,983
+- All-event median tau: 0.3914
+- IOIs ever pedal-ON: 60.376%
+- Time-weighted ON-depth mean / median: 112.772 / 127
+- Equal-width depth class IOI proportions:
+  LIGHT 20.922%, MEDIUM 10.467%, DEEP 68.612%
+- Time-weighted quantile values: 122 and 127
+- CC64=127 ON-time share: 64.691%; the upper quantile tie leaves the
+  strict value-threshold DEEP quantile class empty
+- Baseline rapid reversals within 25 / 50 / 100 / 200 ms:
+  633 / 2,268 / 12,617 / 28,000
+- Baseline / narrow / wide full-timeline transition totals:
+  80,902 / 76,877 / 72,841
+- Narrow / wide main-IOI net transition reductions:
+  4,015 / 8,027
+- Tau outside `[0,1)`, nonpositive IOIs, invalid CC64 values:
+  0 / 0 / 0
+
+### Audit Warnings
+
+- One same-timestamp opposite transition occurs in `17-12.mid` at tick
+  127518: CC64 127 to 39 (UP), then 39 to 79 (DOWN).
+- Five IOIs exceed the transparent 5-second long-IOI warning threshold.
+- CC64 events before the first onset and at/after the last onset are recorded
+  separately and excluded from main IOI targets.
+- Rapid reversals remain candidates, not noise labels; they can include genuine
+  repedaling.
+
+### Artifacts
+
+- Script: `scripts/analyze_stage2_pedal_targets.py`
+- Tests: `tests/test_stage2_pedal_targets.py`
+- Report: `analysis/stage2_pedal_target_audit/summary.md`
+- Machine-readable aggregate:
+  `analysis/stage2_pedal_target_audit/aggregate_summary.json`
+- CSV tables: `analysis/stage2_pedal_target_audit/*.csv`
+- Figures: `analysis/stage2_pedal_target_audit/figures/*.png`

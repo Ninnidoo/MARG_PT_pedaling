@@ -71,6 +71,23 @@ Priorities:
 - Preserve the smoke-test notebook as a verified reference workflow.
 - Experimental notebook changes must not break the verified baseline workflow.
 
+# Session Close Workflow
+
+When the user says `오케이 오늘 연구 진행상황 총정리해서 노션에 기록해줘`, follow `docs/SESSION_CLOSE_WORKFLOW.md`.
+
+For that workflow:
+
+1. Check current Git status and changed files.
+2. Read `docs/EXPERIMENT_LOG.md`, `docs/DECISIONS.md`, `docs/NEXT_SESSION.md`, and recent small experiment metadata.
+3. Build a grounded local Markdown session log first.
+4. Publish the same content to Notion only after the local log exists and the user has requested the Notion record.
+5. Never print Notion tokens or the full parent page ID.
+6. Do not read secrets from anywhere except the project-root `.env` file.
+7. Do not scan large files under `third_party/`, `checkpoints/`, or `outputs/`.
+8. Do not infer work that is not supported by project documents or metadata; write `미확인` instead.
+9. Prevent duplicate Notion uploads using the Markdown file SHA-256 publish log.
+10. Do not make Git commits from Codex.
+
 # Documentation Rules
 
 Whenever setup or execution succeeds:
@@ -104,3 +121,4 @@ exists and reporting its path.
 - Never expose credentials, tokens, or private paths in committed files.
 - Store secrets only in ignored environment files when needed.
 - Do not make unrelated changes outside the requested task.
+

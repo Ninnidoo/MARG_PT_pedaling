@@ -1,0 +1,2 @@
+relative_path,composer,title,folder,candidate_source,file,duration_sec,num_notes,num_cc64_events,num_intermediate_cc64_events,min_cc64,max_cc64,tracks,ticks_per_beat,tempo_changes,selected,selection_threshold_used,selection_reason,random_seed
+Bach/Fugue/bwv_846/Shi05M.mid,Bach,Fugue_bwv_846,Bach/Fugue/bwv_846,asap_metadata_performance,C:\Users\eagle\MARG_research\third_party\PianistTransformer\data\midis\asap-dataset-master\Bach\Fugue\bwv_846\Shi05M.mid,147.24479166666666,754,2428,2297,0,127,1,384,1,True,100,CC64 >= 100,20260727

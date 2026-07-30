@@ -1,0 +1,48 @@
+{
+  "repo_root": "C:\\Users\\eagle\\MARG_research",
+  "tokenizer_file": "C:\\Users\\eagle\\MARG_research\\third_party\\PianistTransformer\\src\\utils\\midi.py",
+  "tokenizer_functions": [
+    "normalize_midi",
+    "midi_to_ids",
+    "ids_to_midi"
+  ],
+  "config_source": "official PianoT5GemmaConfig",
+  "model_training_or_inference": false,
+  "coordinate_system": "Official normalize_midi coordinate: 120 BPM, 500 ticks/beat, 1000 ticks/sec.",
+  "asap_inventory_count": 1,
+  "selected_count": 1,
+  "successful_count": 1,
+  "failed_count": 0,
+  "selection": {
+    "requested_max_files": 100,
+    "requested_min_cc64_events": 100,
+    "threshold_used": 100,
+    "reason": "CC64 >= 100",
+    "random_seed": 20260727,
+    "deterministic_stratified_by_composer": true
+  },
+  "repedal_definition_default": {
+    "high_threshold": 96,
+    "low_threshold": 31,
+    "max_repedal_duration_ms": 300,
+    "operational_threshold_definition_only": true
+  },
+  "ioi_repedal_local_context": {
+    "local_ioi_definition": "next IOI of the note interval containing the raw repedal release time",
+    "multi_ioi_gesture_rule": "represent by the IOI bin at raw release time"
+  },
+  "validation_notes": [
+    "ASAP midi_score paths and filenames containing score are excluded from selection.",
+    "Only CC64 controller events are treated as sustain pedal.",
+    "Raw and reconstructed curves are compared in official normalized 120 BPM time.",
+    "Reconstruction uses tokenized Pedal1-4 values only; no interpolation is used to invent raw pedal values.",
+    "Per-file exceptions are recorded to error_log.csv and do not stop the batch."
+  ],
+  "aggregate_figure_paths": [
+    "C:\\Users\\eagle\\MARG_research\\analysis\\pedal_tokenizer_analysis\\outputs\\figures\\asap_batch_raw_vs_token_intermediate_scatter.png",
+    "C:\\Users\\eagle\\MARG_research\\analysis\\pedal_tokenizer_analysis\\outputs\\figures\\asap_batch_repedal_recall_distribution.png",
+    "C:\\Users\\eagle\\MARG_research\\analysis\\pedal_tokenizer_analysis\\outputs\\figures\\asap_batch_ioi_bin_vs_repedal_recall.png",
+    "C:\\Users\\eagle\\MARG_research\\analysis\\pedal_tokenizer_analysis\\outputs\\figures\\asap_batch_nmae_distribution.png",
+    "C:\\Users\\eagle\\MARG_research\\analysis\\pedal_tokenizer_analysis\\outputs\\figures\\asap_batch_raw_repedal_vs_lost_repedal.png"
+  ]
+}

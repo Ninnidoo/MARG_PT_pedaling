@@ -90,3 +90,102 @@ If Drive is disabled, outputs under `/content` are temporary and must be downloa
 The repeated experiment notebook computes exploratory pedal metrics. These metrics are not final research conclusions. In particular, fast off-on transition candidates must not be treated as repedaling labels until the annotation protocol is finalized.
 
 The second generation result with `CC64 event count = 156` is recorded as a future baseline-analysis target only. Its cause is not interpreted yet.
+## Research Session Close And Notion Logging
+
+Trigger phrase:
+
+`오케이 오늘 연구 진행상황 총정리해서 노션에 기록해줘`
+
+When closing a research session, use the local Markdown log as the source of truth before publishing to Notion.
+
+Dry-run the summary:
+
+```powershell
+python scripts/build_session_summary.py --title "세션 제목" --dry-run
+```
+
+Write the local session log:
+
+```powershell
+python scripts/build_session_summary.py --title "세션 제목"
+```
+
+Dry-run Notion conversion:
+
+```powershell
+python scripts/publish_session_to_notion.py docs/session_logs/YYYY-MM-DD_<slug>.md --dry-run
+```
+
+Publish to Notion only after the local summary has been reviewed:
+
+```powershell
+python scripts/publish_session_to_notion.py docs/session_logs/YYYY-MM-DD_<slug>.md
+```
+
+Required local setup for real upload:
+
+- Install `requirements-notion.txt` in the active Python environment.
+- Copy `.env.example` to `.env`.
+- Fill `NOTION_TOKEN` and `NOTION_PARENT_PAGE_ID` in `.env` only.
+- Share the target Notion parent page with the Notion integration.
+
+Do not commit from Codex during this workflow.
+
+## Local Human Pedal-Tokenizer Batch
+
+Purpose: measure information loss from the official Pianist Transformer MIDI
+tokenizer on the repository-provided human ground-truth/reference performance
+MIDI. This is CPU analysis only and does not run model inference, prediction,
+training, or CUDA code.
+
+Verified command:
+
+```powershell
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' 'analysis\pedal_tokenizer_analysis\analyze_human_batch.py'
+```
+
+Verified on 2026-07-27:
+
+- input: `third_party/PianistTransformer/data/midis/testset/human/`
+- inventoried: 166 MIDI files
+- analyzed: 165
+- excluded: `3-1.mid` (`CC64 event count = 0`)
+- failed: 0
+- CSV output: `outputs/csv/human_*`
+- figure output: `outputs/figures/pedal_tokenizer_analysis/human_*`
+- full report: `analysis/pedal_tokenizer_analysis/HUMAN_BATCH_REPORT.md`
+
+## Stage 2 Event-Based Pedal Target Audit
+
+Purpose: audit raw repository-provided human performance MIDI for a target with
+up to two UP/DOWN transition slots per unique-note-onset IOI and a separate
+LIGHT/MEDIUM/DEEP depth label. This CPU analysis does not use tokenizer pedal
+tokens, model prediction, training, or CUDA.
+
+Verified test command:
+
+```powershell
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' -m unittest discover -s tests -p 'test_stage2_pedal_targets.py' -v
+```
+
+Verified analysis command:
+
+```powershell
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' 'scripts\analyze_stage2_pedal_targets.py'
+```
+
+Optional CLI paths:
+
+```powershell
+& 'C:\Users\eagle\AppData\Local\Programs\Python\Python311\python.exe' 'scripts\analyze_stage2_pedal_targets.py' --input-dir 'path\to\human' --output-dir 'path\to\audit'
+```
+
+Verified on 2026-07-28:
+
+- discovered: 166 MIDI files
+- analyzed: 165
+- excluded: `3-1.mid` (no CC64)
+- failed: 0
+- synthetic tests: 11 passed
+- output: `analysis/stage2_pedal_target_audit/`
+- full report: `analysis/stage2_pedal_target_audit/summary.md`

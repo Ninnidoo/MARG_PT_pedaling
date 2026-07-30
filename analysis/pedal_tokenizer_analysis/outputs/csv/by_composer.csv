@@ -1,0 +1,2 @@
+composer,num_performances,raw_intermediate_time_ratio_mean,token_intermediate_time_ratio_mean,cc64_nmae_mean,raw_repedal_count,preserved_repedal_count,lost_repedal_count,micro_repedal_recall,macro_repedal_recall,median_transition_error_ms_mean,small_n_warning
+Bach,1,0.5359366540335679,0.5284921494315106,0.059226709411729604,32,18,14,0.5625,0.5625,38.00000000000381,True

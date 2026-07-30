@@ -1,0 +1,22 @@
+{
+  "repo_root": "C:\\Users\\eagle\\MARG_research",
+  "pianist_transformer_root": "C:\\Users\\eagle\\MARG_research\\third_party\\PianistTransformer",
+  "tokenizer_file": "C:\\Users\\eagle\\MARG_research\\third_party\\PianistTransformer\\src\\utils\\midi.py",
+  "tokenizer_function": "midi_to_ids",
+  "decoder_function": "ids_to_midi",
+  "config_source": "official PianoT5GemmaConfig",
+  "grid_ms": 10.0,
+  "repedal_definition": {
+    "high_threshold": 96,
+    "low_threshold": 31,
+    "max_repedal_duration_ms": 300,
+    "match_tolerance_ms": 150,
+    "operational_definition_only": true
+  },
+  "transition_threshold": 64,
+  "selected_files": [
+    "C:\\Users\\eagle\\MARG_research\\third_party\\PianistTransformer\\data\\midis\\asap-dataset-master\\Bach\\Fugue\\bwv_846\\Shi05M.mid"
+  ],
+  "model_training_or_inference": false,
+  "coordinate_system": "Official normalize_midi coordinate: 120 BPM, 500 ticks/beat, 1000 ticks/sec."
+}

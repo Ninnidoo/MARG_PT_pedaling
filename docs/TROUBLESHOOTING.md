@@ -136,3 +136,121 @@ Resolution:
 3. Restore checkpoint from Drive or re-download it.
 4. Verify required checkpoint files are nonzero before loading.
 5. Save output MIDI, JSON metadata, and CSV tables to Drive or download them immediately.
+## Session Close And Notion Publishing
+
+### `.env` Missing
+
+Issue:
+
+- `publish_session_to_notion.py` requires project-root `.env` for real upload.
+
+Resolution:
+
+1. Copy `.env.example` to `.env`.
+2. Fill `NOTION_TOKEN` and `NOTION_PARENT_PAGE_ID` locally.
+3. Do not commit `.env`.
+
+### Notion Dependency Missing
+
+Issue:
+
+- Real upload requires the `requests` package.
+
+Resolution:
+
+```powershell
+python -m pip install -r requirements-notion.txt
+```
+
+### Notion 401 or 403
+
+Issue:
+
+- The token may be invalid, or the integration may not have access to the parent page.
+
+Resolution:
+
+1. Regenerate or verify the Notion integration token.
+2. Share the target parent page with the integration in Notion.
+3. Confirm `NOTION_PARENT_PAGE_ID` points to the intended parent page.
+4. Do not print the token or full parent page ID while debugging.
+
+### Notion Rate Limit or Service Overload
+
+Issue:
+
+- The API may return 429 or 529.
+
+Resolution:
+
+- The publish script retries limited transient failures and respects `Retry-After` when present.
+- If retries fail, wait and run the same command again.
+- Duplicate upload prevention uses SHA-256 to avoid creating a second page for the same Markdown file after a successful publish.
+
+### Duplicate Upload Prevented
+
+Issue:
+
+- The Markdown SHA-256 already exists in `docs/session_logs/.notion_publish_log.json`.
+
+Resolution:
+
+- Use the existing Notion page URL from the publish log output.
+- If the content intentionally changed, regenerate or edit the Markdown so the SHA-256 changes, then dry-run again before uploading.
+
+## Human Pedal-Tokenizer Batch
+
+### Matplotlib 3.8 `boxplot()` Keyword Error
+
+Issue:
+
+- The first 165-file analysis pass completed its tokenizer and CSV work, then
+  stopped while creating the score-index boxplot.
+- Matplotlib 3.8.4 raised:
+  `TypeError: Axes.boxplot() got an unexpected keyword argument 'tick_labels'`.
+
+Cause:
+
+- The `tick_labels` keyword is not supported by the installed Matplotlib 3.8.4
+  API.
+
+Resolution:
+
+- Changed the compatible keyword to `labels`.
+- Re-ran the exact batch command.
+- The second run completed with exit code 0: inventory 166, eligible 165,
+  successful 165, failed 0.
+- All requested CSV files and PNG figures were then verified.
+
+## Stage 2 Pedal Target Audit
+
+### Dynamic Test Import Failed With `dataclass` Error
+
+Issue:
+
+- The first synthetic-test run failed while dynamically importing
+  `scripts/analyze_stage2_pedal_targets.py`.
+- Python 3.11 `dataclass` processing could not find the temporary module in
+  `sys.modules`.
+
+Resolution:
+
+- Registered the module under `SPEC.name` in `sys.modules` before
+  `exec_module()`.
+- Re-ran the suite; all 11 synthetic tests passed.
+
+### Empty Depth Class Broke Markdown Formatting
+
+Issue:
+
+- The first complete 166-file calculation wrote CSV, JSON, and figures, then
+  failed while formatting `summary.md`.
+- The time-weighted second quantile was CC64=127, leaving the strict
+  quantile-based DEEP class empty and its representative median equal to
+  `None`.
+
+Resolution:
+
+- Render optional aggregate values as `n/a` in Markdown.
+- Added an explicit quantile-tie warning instead of hiding the empty class.
+- Re-ran the full command to exit code 0 and verified all requested artifacts.

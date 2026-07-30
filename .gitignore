@@ -1,35 +1,84 @@
-﻿.venv/
+﻿# =========================================================
+# Python
+# =========================================================
+.venv/
+venv/
 __pycache__/
 **/__pycache__/
-**pycache**/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
 
-checkpoints/*
+# =========================================================
+# Secrets and local configuration
+# =========================================================
+.env
+.env.*
+!.env.example
+
+.vscode/
+.idea/
+
+# =========================================================
+# Checkpoints and model weights
+# =========================================================
+checkpoints/**
 !checkpoints/.gitkeep
 
-outputs/*
-!outputs/midi/
-!outputs/midi/.gitkeep
-!outputs/audio/
-!outputs/audio/.gitkeep
-!outputs/figures/
-!outputs/figures/.gitkeep
-
-data/raw/*
-!data/raw/.gitkeep
-data/interim/*
-!data/interim/.gitkeep
-
-logs/*
-!logs/.gitkeep
-
-.env
-.vscode/
 *.ckpt
 *.pt
 *.pth
 *.bin
+*.safetensors
+
+# =========================================================
+# Generated experiment outputs
+# =========================================================
+outputs/**
+
+!outputs/midi/
+!outputs/midi/.gitkeep
+
+!outputs/audio/
+!outputs/audio/.gitkeep
+
+!outputs/figures/
+!outputs/figures/.gitkeep
+
+# =========================================================
+# Local datasets and intermediate files
+# =========================================================
+data/raw/**
+!data/raw/.gitkeep
+
+data/interim/**
+!data/interim/.gitkeep
+
+data/processed/**
+!data/processed/.gitkeep
+
+# =========================================================
+# Logs and experiment artifacts
+# =========================================================
+logs/**
+!logs/.gitkeep
+
+experiments/
+runs/
+wandb/
+
+# =========================================================
+# Generated media
+# =========================================================
 *.wav
 *.flac
+*.mp3
 
+# MIDI files produced during experiments
+*.mid
+*.midi
+
+# =========================================================
+# External source repositories
+# =========================================================
 third_party/PianistTransformer/

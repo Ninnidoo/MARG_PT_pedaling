@@ -1,0 +1,6 @@
+ioi_bin,ioi_start_sec,ioi_end_sec,local_ioi_definition,multi_ioi_gesture_rule,raw_repedal_count,preserved_count,lost_count,repedal_recall,mean_transition_timing_error_ms,median_transition_timing_error_ms,transition_match_count
+<100ms,0.0,0.1,next IOI of the note interval containing the raw repedal release time,represent by the IOI bin at raw release time,0,0,0,nan,4.16666666666643,3.0000000000001137,6
+100-250ms,0.1,0.25,next IOI of the note interval containing the raw repedal release time,represent by the IOI bin at raw release time,2,1,1,0.5,27.166666666664934,29.500000000002302,6
+250-500ms,0.25,0.5,next IOI of the note interval containing the raw repedal release time,represent by the IOI bin at raw release time,22,15,7,0.6818181818181818,37.23602484472095,35.99999999999426,161
+500-1000ms,0.5,1.0,next IOI of the note interval containing the raw repedal release time,represent by the IOI bin at raw release time,8,2,6,0.25,98.60869565217394,111.00000000000065,23
+>=1000ms,1.0,inf,next IOI of the note interval containing the raw repedal release time,represent by the IOI bin at raw release time,0,0,0,nan,131.66666666667481,129.99999999999545,3
