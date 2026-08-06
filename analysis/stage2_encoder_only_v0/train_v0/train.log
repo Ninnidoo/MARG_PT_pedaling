@@ -1,0 +1,70 @@
+configuration {"allow_existing_log_dir": true, "amp_enabled": true, "amp_init_scale": 1024.0, "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1", "batch_size": 16, "checkpoint_boundary_note": "Checkpoints are exact at completed epoch boundaries. An interruption within an epoch restarts that epoch.", "checkpoint_path": "/workspace/project/checkpoints/pianist_transformer", "early_stopping_min_delta": 0.0001, "early_stopping_patience": 4, "encoder_lr": 1e-05, "expected_gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b", "freeze_encoder": false, "head_lr": 0.0001, "max_epochs": 20, "max_grad_norm": 1.0, "num_workers": 0, "output_dir": "/workspace/project/analysis/stage2_encoder_only_v0/train_v0", "pianist_transformer_commit": "747df2d12291e37f6638b39f1b71517e579ad48c", "pin_memory": true, "project_git_commit": "1d64469760e963492897723c92e61ddad7c76a54", "resume": null, "seed": 20260710, "split_csv": "/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv", "validation_overlap_note": "Validation metrics count overlapping windows independently. Overlap-aware test reconstruction is deferred to a later task.", "weight_decay": 0.01}
+GPU uuid=GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b model=NVIDIA GeForce RTX 2080 Ti
+Validation metrics count overlapping windows independently. Overlap-aware test reconstruction is deferred to a later task.
+preload train_seconds=53.258 validation_seconds=4.600
+datasets train_performances=892 train_windows=11230 validation_performances=71 validation_windows=1078
+model loaded seconds=1.204
+epoch 1 start train_batches=702 validation_batches=68
+train batch 100/702 loss=2.123129 global_step=100
+train batch 200/702 loss=3.024043 global_step=200
+train batch 300/702 loss=3.181022 global_step=300
+train batch 400/702 loss=2.622951 global_step=400
+train batch 500/702 loss=2.393879 global_step=500
+train batch 600/702 loss=2.733774 global_step=600
+train batch 700/702 loss=2.127289 global_step=700
+epoch 1 complete train={'loss': 2.7284205761668874, 'pedal_token_accuracy': 0.4815092470288899, 'exact_note_accuracy': 0.4186837885910348, 'pedal1_accuracy': 0.48044579435253404, 'pedal2_accuracy': 0.4786269319651193, 'pedal3_accuracy': 0.4797858762213443, 'pedal4_accuracy': 0.4871783855765622, 'pedal_value_mae': 36.08744959882911, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 2.2709571779990685, 'pedal_token_accuracy': 0.5611823653467068, 'exact_note_accuracy': 0.5094684891001855, 'pedal1_accuracy': 0.5604653438079777, 'pedal2_accuracy': 0.5589959705473099, 'pedal3_accuracy': 0.5625996492346939, 'pedal4_accuracy': 0.562668497796846, 'pedal_value_mae': 32.535822088952855, 'valid_target_count': 2207744, 'valid_note_count': 551936} train_seconds=246.864 validation_seconds=6.742 seconds=253.606 elapsed=257.883 estimated_remaining=4899.786 peak_gpu_bytes=9368943104 improved=True early_counter=0
+checkpoint last.pt saved
+checkpoint best.pt saved
+epoch 2 start train_batches=702 validation_batches=68
+train batch 100/702 loss=2.695446 global_step=802
+train batch 200/702 loss=2.738120 global_step=902
+train batch 300/702 loss=2.707394 global_step=1002
+train batch 400/702 loss=2.814499 global_step=1102
+train batch 500/702 loss=2.549775 global_step=1202
+train batch 600/702 loss=2.680058 global_step=1302
+train batch 700/702 loss=2.467311 global_step=1402
+epoch 2 complete train={'loss': 2.5199756140131244, 'pedal_token_accuracy': 0.5273204193002224, 'exact_note_accuracy': 0.4751520125067879, 'pedal1_accuracy': 0.5256559262700641, 'pedal2_accuracy': 0.5252000365964088, 'pedal3_accuracy': 0.5290036975592074, 'pedal4_accuracy': 0.5294220167752094, 'pedal_value_mae': 31.002166438903814, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 2.2459586270443803, 'pedal_token_accuracy': 0.5717999913033395, 'exact_note_accuracy': 0.5187068790584416, 'pedal1_accuracy': 0.570515422077922, 'pedal2_accuracy': 0.5697091691790352, 'pedal3_accuracy': 0.573378072820037, 'pedal4_accuracy': 0.5735973011363636, 'pedal_value_mae': 30.96791883656178, 'valid_target_count': 2207744, 'valid_note_count': 551936} train_seconds=247.477 validation_seconds=6.709 seconds=254.192 elapsed=516.814 estimated_remaining=4651.322 peak_gpu_bytes=9368943104 improved=True early_counter=0
+checkpoint last.pt saved
+checkpoint best.pt saved
+epoch 3 start train_batches=702 validation_batches=68
+train batch 100/702 loss=2.901681 global_step=1504
+train batch 200/702 loss=2.491516 global_step=1604
+train batch 300/702 loss=2.416913 global_step=1704
+train batch 400/702 loss=2.339858 global_step=1804
+train batch 500/702 loss=2.257455 global_step=1904
+train batch 600/702 loss=2.456992 global_step=2004
+train batch 700/702 loss=2.835466 global_step=2104
+epoch 3 complete train={'loss': 2.464913169797919, 'pedal_token_accuracy': 0.5396087419497467, 'exact_note_accuracy': 0.48652281587797114, 'pedal1_accuracy': 0.5375353223179998, 'pedal2_accuracy': 0.5378151874400569, 'pedal3_accuracy': 0.5414643920769471, 'pedal4_accuracy': 0.5416200659639832, 'pedal_value_mae': 29.176304421988053, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 2.2598530545084285, 'pedal_token_accuracy': 0.5702427455357143, 'exact_note_accuracy': 0.518284728664193, 'pedal1_accuracy': 0.5682778438079777, 'pedal2_accuracy': 0.5691710633116883, 'pedal3_accuracy': 0.5718108621289425, 'pedal4_accuracy': 0.5717112128942486, 'pedal_value_mae': 31.223113277626393, 'valid_target_count': 2207744, 'valid_note_count': 551936} train_seconds=247.340 validation_seconds=6.713 seconds=254.061 elapsed=774.204 estimated_remaining=4387.155 peak_gpu_bytes=9368943104 improved=False early_counter=1
+checkpoint last.pt saved
+epoch 4 start train_batches=702 validation_batches=68
+train batch 100/702 loss=2.733152 global_step=2206
+train batch 200/702 loss=2.443581 global_step=2306
+train batch 300/702 loss=2.868522 global_step=2406
+train batch 400/702 loss=2.445137 global_step=2506
+train batch 500/702 loss=2.463696 global_step=2606
+train batch 600/702 loss=2.356154 global_step=2706
+train batch 700/702 loss=2.676466 global_step=2806
+epoch 4 complete train={'loss': 2.4261754955117016, 'pedal_token_accuracy': 0.5468443598568009, 'exact_note_accuracy': 0.49343299708933314, 'pedal1_accuracy': 0.544600655604486, 'pedal2_accuracy': 0.5450480223502479, 'pedal3_accuracy': 0.548813938918089, 'pedal4_accuracy': 0.5489148225543806, 'pedal_value_mae': 28.09136557740964, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 2.295029261337804, 'pedal_token_accuracy': 0.559557176919063, 'exact_note_accuracy': 0.5089448776669759, 'pedal1_accuracy': 0.5580339024814471, 'pedal2_accuracy': 0.5582495071892394, 'pedal3_accuracy': 0.560950907351577, 'pedal4_accuracy': 0.5609943906539888, 'pedal_value_mae': 32.51501804910918, 'valid_target_count': 2207744, 'valid_note_count': 551936} train_seconds=247.951 validation_seconds=6.727 seconds=254.694 elapsed=1032.169 estimated_remaining=4128.677 peak_gpu_bytes=9368943104 improved=False early_counter=2
+checkpoint last.pt saved
+epoch 5 start train_batches=702 validation_batches=68
+train batch 100/702 loss=2.647790 global_step=2908
+train batch 200/702 loss=2.175949 global_step=3008
+train batch 300/702 loss=2.476447 global_step=3108
+train batch 400/702 loss=2.545715 global_step=3208
+train batch 500/702 loss=2.123214 global_step=3308
+train batch 600/702 loss=2.464593 global_step=3408
+train batch 700/702 loss=2.425370 global_step=3508
+epoch 5 complete train={'loss': 2.392985707333665, 'pedal_token_accuracy': 0.5522293718184693, 'exact_note_accuracy': 0.4985484931985296, 'pedal1_accuracy': 0.5499454010802898, 'pedal2_accuracy': 0.5504190323589482, 'pedal3_accuracy': 0.5542425221743972, 'pedal4_accuracy': 0.554310531660242, 'pedal_value_mae': 27.270551521979264, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 2.3184428065738785, 'pedal_token_accuracy': 0.5640572457676253, 'exact_note_accuracy': 0.5140813427643784, 'pedal1_accuracy': 0.5632464633580705, 'pedal2_accuracy': 0.562668497796846, 'pedal3_accuracy': 0.5654894770408163, 'pedal4_accuracy': 0.5648245448747681, 'pedal_value_mae': 31.76273607809601, 'valid_target_count': 2207744, 'valid_note_count': 551936} train_seconds=247.506 validation_seconds=6.710 seconds=254.216 elapsed=1289.927 estimated_remaining=3869.780 peak_gpu_bytes=9368943104 improved=False early_counter=3
+checkpoint last.pt saved
+epoch 6 start train_batches=702 validation_batches=68
+train batch 100/702 loss=2.625877 global_step=3610
+train batch 200/702 loss=2.038635 global_step=3710
+train batch 300/702 loss=1.887284 global_step=3810
+train batch 400/702 loss=2.885931 global_step=3910
+train batch 500/702 loss=2.077513 global_step=4010
+train batch 600/702 loss=2.910906 global_step=4110
+train batch 700/702 loss=2.775457 global_step=4210
+epoch 6 complete train={'loss': 2.3574668704639175, 'pedal_token_accuracy': 0.5569660324796606, 'exact_note_accuracy': 0.5031519178848946, 'pedal1_accuracy': 0.554671973377852, 'pedal2_accuracy': 0.5550666371205166, 'pedal3_accuracy': 0.5590141442336827, 'pedal4_accuracy': 0.5591113751865913, 'pedal_value_mae': 26.54573585958146, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 2.285506557334553, 'pedal_token_accuracy': 0.5723639153814936, 'exact_note_accuracy': 0.5205331777597403, 'pedal1_accuracy': 0.5708179933905381, 'pedal2_accuracy': 0.5708596648886828, 'pedal3_accuracy': 0.5737766697588126, 'pedal4_accuracy': 0.5740013334879406, 'pedal_value_mae': 30.772349512422238, 'valid_target_count': 2207744, 'valid_note_count': 551936} train_seconds=247.421 validation_seconds=6.714 seconds=254.136 elapsed=1547.327 estimated_remaining=3610.429 peak_gpu_bytes=9368943104 improved=False early_counter=4
+checkpoint last.pt saved
+early stopping at epoch 6; best_epoch=2
+training finished completed_epoch=6 global_step=4212 best_epoch=2 best_validation_loss=2.2459586270443803

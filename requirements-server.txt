@@ -1,0 +1,24 @@
+# PyTorch 2.7.1+cu118 is supplied by the pinned pytorch/pytorch base image.
+# Keep the official Pianist Transformer inference stack pinned.
+transformers==4.54.0
+datasets==4.0.0
+accelerate==1.10.1
+miditoolkit==1.0.1
+wandb==0.21.4
+partitura==1.7.0
+seaborn==0.13.2
+huggingface-hub==0.35.3
+
+# Dependencies used by the repository's pedal-analysis scripts and notebooks.
+mido==1.3.3
+numpy==1.26.4
+matplotlib==3.8.4
+pandas==2.2.3
+PyYAML==6.0.3
+regex==2026.7.19
+safetensors==0.8.0
+tokenizers==0.21.4
+
+# VS Code notebook kernel and optional Notion session publishing.
+ipykernel==6.29.5
+requests>=2.31,<3

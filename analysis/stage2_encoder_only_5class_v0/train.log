@@ -1,0 +1,126 @@
+FIVE CLASS RUN START run_id=20260804T074244Z-16e72a08637a output=/workspace/project/analysis/stage2_encoder_only_5class_v0
+lock={'run_id': '20260804T074244Z-16e72a08637a', 'host_pid': 88491, 'container_pid': 2536, 'host_process': {'pid': 88491, 'hostname': 'user', 'proc_start_time': None}, 'container_process': {'pid': 2536, 'hostname': 'd3affcb5b8ad', 'proc_start_time': '1694323863'}, 'created_at_utc': '2026-08-04T07:42:44.958944+00:00', 'created_at_kst': '2026-08-04T16:42:44.958952+09:00'} existing_action={'action': 'new', 'stale_lock_archives': [], 'archive_path': None}
+REUSED SYNTHETIC TESTS total=107 passed=107 skipped=0; post-patch runtime=11/11
+five-class overfit step=5 metrics={"all_five_classes_predicted": false, "ce_loss": 0.971420168876648, "decoded_mae_gap": 17.673828125, "exact_note_accuracy": 0.35791015625, "per_class_recall": {"FULL": 0.09577114427860696, "HIGH": 0.07776427703523693, "LOW": 0.851104707012488, "MID": 0.5662494605092793, "ZERO": 0.0}, "predicted_class_counts": [0, 5393, 2606, 99, 94], "quantization_oracle_mae": 9.93798828125, "representative_decoded_mae": 27.61181640625, "target_class_counts": [84, 4164, 2317, 823, 804], "token_accuracy": 0.6099853515625}
+five-class overfit step=10 metrics={"all_five_classes_predicted": true, "ce_loss": 0.5679053664207458, "decoded_mae_gap": 6.524169921875, "exact_note_accuracy": 0.63525390625, "per_class_recall": {"FULL": 0.7238805970149254, "HIGH": 0.47144592952612396, "LOW": 0.9421229586935639, "MID": 0.7557186016400518, "ZERO": 0.023809523809523808}, "predicted_class_counts": [2, 4668, 2277, 522, 723], "quantization_oracle_mae": 9.93798828125, "representative_decoded_mae": 16.462158203125, "target_class_counts": [84, 4164, 2317, 823, 804], "token_accuracy": 0.811279296875}
+five-class overfit step=15 metrics={"all_five_classes_predicted": true, "ce_loss": 0.2371310293674469, "decoded_mae_gap": 1.763671875, "exact_note_accuracy": 0.828125, "per_class_recall": {"FULL": 0.900497512437811, "HIGH": 0.8493317132442284, "LOW": 0.9829490874159462, "MID": 0.8981441519205869, "ZERO": 0.6190476190476191}, "predicted_class_counts": [52, 4339, 2260, 783, 758], "quantization_oracle_mae": 9.93798828125, "representative_decoded_mae": 11.70166015625, "target_class_counts": [84, 4164, 2317, 823, 804], "token_accuracy": 0.9337158203125}
+five-class overfit step=20 metrics={"all_five_classes_predicted": true, "ce_loss": 0.07732001692056656, "decoded_mae_gap": 0.3160400390625, "exact_note_accuracy": 0.95458984375, "per_class_recall": {"FULL": 0.9776119402985075, "HIGH": 0.9647630619684082, "LOW": 0.9937560038424592, "MID": 0.9896417781614156, "ZERO": 0.8333333333333334}, "predicted_class_counts": [70, 4170, 2346, 811, 795], "quantization_oracle_mae": 9.93798828125, "representative_decoded_mae": 10.2540283203125, "target_class_counts": [84, 4164, 2317, 823, 804], "token_accuracy": 0.9864501953125}
+five-class overfit step=25 metrics={"all_five_classes_predicted": true, "ce_loss": 0.02398877590894699, "decoded_mae_gap": 0.017822265625, "exact_note_accuracy": 0.99658203125, "per_class_recall": {"FULL": 1.0, "HIGH": 0.9951397326852977, "LOW": 0.9995196926032661, "MID": 1.0, "ZERO": 0.9880952380952381}, "predicted_class_counts": [83, 4162, 2324, 819, 804], "quantization_oracle_mae": 9.93798828125, "representative_decoded_mae": 9.955810546875, "target_class_counts": [84, 4164, 2317, 823, 804], "token_accuracy": 0.9991455078125}
+FIVE-CLASS RUN START {"amp_enabled": true, "amp_init_scale": 1024.0, "architecture": "official PT encoder + four independent Linear(768,5) heads", "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1", "asap_test_midi_accessed": false, "batch_size": 16, "cache_mode": "preload", "checkpoint_path": "/workspace/project/checkpoints/pianist_transformer", "class_boundaries": [[0, 0], [1, 63], [64, 95], [96, 126], [127, 127]], "class_names": ["ZERO", "LOW", "MID", "HIGH", "FULL"], "container_pid": 2536, "container_visible_cuda_index": 0, "cuda_version": "12.6", "dataset_cache_mode": "preload", "dataset_class": "Stage2PedalDataset", "early_stopping_min_delta": 0.0001, "early_stopping_patience": 4, "encoder_lr": 1e-05, "existing_run_action": {"action": "new", "archive_path": null, "stale_lock_archives": []}, "expected_gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b", "expected_train_performances": 892, "expected_train_pieces": 180, "expected_validation_performances": 71, "expected_validation_pieces": 19, "freeze_encoder": false, "git_metadata": {"commit": "1d64469760e963492897723c92e61ddad7c76a54", "commit_source": "STAGE2_PROJECT_GIT_COMMIT", "dirty": true, "dirty_status": " M AGENTS.md\n D requirements-notion.txt\n?? .devcontainer/\n?? .dockerignore\n?? Dockerfile\n?? analysis/stage2_encoder_only_coarse_to_fine_v0/\n?? analysis/stage2_encoder_only_ordinal_v0/\n?? analysis/stage2_encoder_only_v0/\n?? analysis/stage2_pedal_5class_audit_v0/\n?? analysis/stage2_pedal_6class_audit_v0/\n?? docs/SERVER_DOCKER_SETUP.md\n?? docs/SERVER_WORKFLOW.md\n?? requirements-server.txt\n?? src/stage2_encoder_only/\n?? tests/test_stage2_calibration.py\n?? tests/test_stage2_coarse_to_fine.py\n?? tests/test_stage2_dataset.py\n?? tests/test_stage2_evaluate.py\n?? tests/test_stage2_five_class.py\n?? tests/test_stage2_five_class_audit.py\n?? tests/test_stage2_five_class_runtime.py\n?? tests/test_stage2_model.py\n?? tests/test_stage2_ordinal.py\n?? tests/test_stage2_posterior.py\n?? tests/test_stage2_six_class_audit.py\n?? tests/test_stage2_train.py\n?? tests/test_stage2_training.py\n", "dirty_status_source": "STAGE2_PROJECT_GIT_STATUS_B64", "warnings": []}, "gpu_name": "NVIDIA GeForce RTX 2080 Ti", "gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b", "head_lr": 0.0001, "host_pid": 88491, "input_grammar": ["Pitch", "IOI", "Velocity", "Duration", "MASK", "MASK", "MASK", "MASK"], "launch_kst_timestamp": "2026-08-04T16:42:44.971093+09:00", "launch_utc_timestamp": "2026-08-04T07:42:44.971084+00:00", "loss": "standard_unweighted_5class_cross_entropy", "loss_configuration": {"class_weighting": null, "classes": 5, "ignore_index": -100, "label_smoothing": 0.0, "name": "unweighted_cross_entropy"}, "max_epochs": 20, "max_grad_norm": 1.0, "num_workers": 0, "output_dir": "/workspace/project/analysis/stage2_encoder_only_5class_v0", "overlap_decoding": "average raw logits -> one argmax -> canonical representative", "pianist_transformer_commit": "747df2d12291e37f6638b39f1b71517e579ad48c", "pin_memory": true, "pipeline_splits": ["train", "validation"], "progress_interval": 100, "project_git_commit": "1d64469760e963492897723c92e61ddad7c76a54", "project_git_dirty": true, "project_git_dirty_status": " M AGENTS.md\n D requirements-notion.txt\n?? .devcontainer/\n?? .dockerignore\n?? Dockerfile\n?? analysis/stage2_encoder_only_coarse_to_fine_v0/\n?? analysis/stage2_encoder_only_ordinal_v0/\n?? analysis/stage2_encoder_only_v0/\n?? analysis/stage2_pedal_5class_audit_v0/\n?? analysis/stage2_pedal_6class_audit_v0/\n?? docs/SERVER_DOCKER_SETUP.md\n?? docs/SERVER_WORKFLOW.md\n?? requirements-server.txt\n?? src/stage2_encoder_only/\n?? tests/test_stage2_calibration.py\n?? tests/test_stage2_coarse_to_fine.py\n?? tests/test_stage2_dataset.py\n?? tests/test_stage2_evaluate.py\n?? tests/test_stage2_five_class.py\n?? tests/test_stage2_five_class_audit.py\n?? tests/test_stage2_five_class_runtime.py\n?? tests/test_stage2_model.py\n?? tests/test_stage2_ordinal.py\n?? tests/test_stage2_posterior.py\n?? tests/test_stage2_six_class_audit.py\n?? tests/test_stage2_train.py\n?? tests/test_stage2_training.py\n", "pytorch_version": "2.8.0+cu126", "representative_policy": "canonical_interval_midpoint", "representatives": [0, 32, 80, 111, 127], "resume": null, "run_id": "20260804T074244Z-16e72a08637a", "runtime_metadata": {"container_hostname": "d3affcb5b8ad", "container_name": "ilkyun-marg-pedaling-dev", "container_repository_path": "/workspace/project", "container_uid": 0, "container_username": "root", "container_visible_cuda_index": 0, "cuda_version": "12.6", "cuda_visible_devices": "0", "gpu": {"cuda_available": true, "name": "NVIDIA GeForce RTX 2080 Ti", "nvidia_smi_name": "NVIDIA GeForce RTX 2080 Ti", "uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b", "visible_device_count": 1}, "host_physical_gpu_mapping": "physical_gpu_1_to_container_cuda_0_GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b", "host_repository_path": "/home/intern_2026_summer/yimilkyun/MARG_PT_pedaling", "host_uid": 1004, "host_username": "intern_2026_summer", "pytorch_version": "2.8.0+cu126", "warnings": []}, "scheduler": null, "seed": 20260710, "split_csv": "/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv", "split_csv_sha256": "d1fe379eb123ff7abca93773296f735f40a215dcd6e6363b55756383708c965b", "stride_notes": 256, "test_rows_passed_to_pipeline": 0, "test_split_passed_to_pipeline": false, "tmux_session_name": "stage2-5class-v0", "tokenizer": "pinned PT midi_to_ids/_PinnedTokenizerConfig", "train_performance_count": 892, "train_piece_count": 180, "validation_performance_count": 71, "validation_piece_count": 19, "validation_training_loss_overlap_policy": "window-level CE for checkpoint selection; final metrics are reconstructed", "weight_decay": 0.01, "window_notes": 512}
+datasets train_performances=892 train_windows=11230 validation_performances=71 validation_windows=1078
+epoch 1 start train_batches=702 validation_batches=68
+training epoch=1 batch=1/702 loss=2.070296 global_step=1
+training epoch=1 batch=100/702 loss=1.121443 global_step=100
+training epoch=1 batch=200/702 loss=1.214302 global_step=200
+training epoch=1 batch=300/702 loss=1.342451 global_step=300
+training epoch=1 batch=400/702 loss=1.144046 global_step=400
+training epoch=1 batch=500/702 loss=1.155477 global_step=500
+training epoch=1 batch=600/702 loss=1.158898 global_step=600
+training epoch=1 batch=700/702 loss=1.047645 global_step=700
+validation epoch=1 batch=1/68 loss=1.232748 global_step=702
+epoch 1 complete train={'loss': 1.2239116525010176, 'pedal_token_accuracy': 0.5140181291373161, 'exact_note_accuracy': 0.4012368333809342, 'pedal1_accuracy': 0.5128153526804956, 'pedal2_accuracy': 0.5106336570770392, 'pedal3_accuracy': 0.5163212329789303, 'pedal4_accuracy': 0.5163022738127996, 'pedal_value_mae': 1.033337954194659, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.1388706881172803, 'pedal_token_accuracy': 0.568311815137987, 'exact_note_accuracy': 0.492299831864564, 'pedal1_accuracy': 0.5663156597866419, 'pedal2_accuracy': 0.5672632334183674, 'pedal3_accuracy': 0.5696982983534323, 'pedal4_accuracy': 0.5699700689935064, 'pedal_value_mae': 1.0019608251681353, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=True early_counter=0 peak_gpu_bytes=9356540416
+epoch 2 start train_batches=702 validation_batches=68
+training epoch=2 batch=1/702 loss=1.309016 global_step=703
+training epoch=2 batch=100/702 loss=1.123152 global_step=802
+training epoch=2 batch=200/702 loss=1.293224 global_step=902
+training epoch=2 batch=300/702 loss=1.097128 global_step=1002
+training epoch=2 batch=400/702 loss=1.229346 global_step=1102
+training epoch=2 batch=500/702 loss=1.125520 global_step=1202
+training epoch=2 batch=600/702 loss=1.157260 global_step=1302
+training epoch=2 batch=700/702 loss=1.075869 global_step=1402
+validation epoch=2 batch=1/68 loss=1.222756 global_step=1404
+epoch 2 complete train={'loss': 1.1005234928620065, 'pedal_token_accuracy': 0.5649760627482303, 'exact_note_accuracy': 0.46661082119627817, 'pedal1_accuracy': 0.5646133599851666, 'pedal2_accuracy': 0.5635909565125431, 'pedal3_accuracy': 0.5659011917836192, 'pedal4_accuracy': 0.5657987427115921, 'pedal_value_mae': 0.8392700600957519, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.117111862148115, 'pedal_token_accuracy': 0.5798380609346011, 'exact_note_accuracy': 0.5072707705241187, 'pedal1_accuracy': 0.5774220199443414, 'pedal2_accuracy': 0.5790526437847866, 'pedal3_accuracy': 0.5819605896335807, 'pedal4_accuracy': 0.5809169903756958, 'pedal_value_mae': 0.9410502305167947, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=True early_counter=0 peak_gpu_bytes=9356540416
+epoch 3 start train_batches=702 validation_batches=68
+training epoch=3 batch=1/702 loss=1.044198 global_step=1405
+training epoch=3 batch=100/702 loss=1.154651 global_step=1504
+training epoch=3 batch=200/702 loss=1.062854 global_step=1604
+training epoch=3 batch=300/702 loss=1.032970 global_step=1704
+training epoch=3 batch=400/702 loss=0.997055 global_step=1804
+training epoch=3 batch=500/702 loss=1.014836 global_step=1904
+training epoch=3 batch=600/702 loss=1.098285 global_step=2004
+training epoch=3 batch=700/702 loss=1.229516 global_step=2104
+validation epoch=3 batch=1/68 loss=1.192265 global_step=2106
+epoch 3 complete train={'loss': 1.0559259984072016, 'pedal_token_accuracy': 0.5817986265214731, 'exact_note_accuracy': 0.4853478693897827, 'pedal1_accuracy': 0.5809292009076744, 'pedal2_accuracy': 0.5807331735661218, 'pedal3_accuracy': 0.5830239278591554, 'pedal4_accuracy': 0.5825082037529409, 'pedal_value_mae': 0.7783245160712307, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.1156102244177202, 'pedal_token_accuracy': 0.580490763421846, 'exact_note_accuracy': 0.505824950718924, 'pedal1_accuracy': 0.57799092648423, 'pedal2_accuracy': 0.5805310760667903, 'pedal3_accuracy': 0.5817268668831169, 'pedal4_accuracy': 0.5817141842532467, 'pedal_value_mae': 0.9218822473276524, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=True early_counter=0 peak_gpu_bytes=9356540416
+epoch 4 start train_batches=702 validation_batches=68
+training epoch=4 batch=1/702 loss=1.009854 global_step=2107
+training epoch=4 batch=100/702 loss=1.149794 global_step=2206
+training epoch=4 batch=200/702 loss=1.002116 global_step=2306
+training epoch=4 batch=300/702 loss=1.118914 global_step=2406
+training epoch=4 batch=400/702 loss=0.991005 global_step=2506
+training epoch=4 batch=500/702 loss=1.028376 global_step=2606
+training epoch=4 batch=600/702 loss=1.077047 global_step=2706
+training epoch=4 batch=700/702 loss=1.072926 global_step=2806
+validation epoch=4 batch=1/68 loss=1.132644 global_step=2808
+epoch 4 complete train={'loss': 1.022809553848661, 'pedal_token_accuracy': 0.5945861927176626, 'exact_note_accuracy': 0.49809155990105053, 'pedal1_accuracy': 0.5935860967042708, 'pedal2_accuracy': 0.5933024049615268, 'pedal3_accuracy': 0.5959509482887874, 'pedal4_accuracy': 0.5955053209160651, 'pedal_value_mae': 0.7340817798234854, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.180918637918851, 'pedal_token_accuracy': 0.5601301600185529, 'exact_note_accuracy': 0.4854892596243043, 'pedal1_accuracy': 0.5584542410714286, 'pedal2_accuracy': 0.5596953269944341, 'pedal3_accuracy': 0.5612897147495362, 'pedal4_accuracy': 0.5610813572588126, 'pedal_value_mae': 0.9843478229359925, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=False early_counter=1 peak_gpu_bytes=9356540416
+epoch 5 start train_batches=702 validation_batches=68
+training epoch=5 batch=1/702 loss=0.925789 global_step=2809
+training epoch=5 batch=100/702 loss=1.088470 global_step=2908
+training epoch=5 batch=200/702 loss=0.954204 global_step=3008
+training epoch=5 batch=300/702 loss=0.995178 global_step=3108
+training epoch=5 batch=400/702 loss=1.021344 global_step=3208
+training epoch=5 batch=500/702 loss=0.907776 global_step=3308
+training epoch=5 batch=600/702 loss=0.995723 global_step=3408
+training epoch=5 batch=700/702 loss=0.941812 global_step=3508
+validation epoch=5 batch=1/68 loss=1.149691 global_step=3510
+epoch 5 complete train={'loss': 0.9931089215913445, 'pedal_token_accuracy': 0.6062712138284331, 'exact_note_accuracy': 0.5099078167076521, 'pedal1_accuracy': 0.6050790040628276, 'pedal2_accuracy': 0.604925069548831, 'pedal3_accuracy': 0.6077339830703343, 'pedal4_accuracy': 0.6073467986317396, 'pedal_value_mae': 0.6993576323579764, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.1322167083372212, 'pedal_token_accuracy': 0.5801347438833488, 'exact_note_accuracy': 0.5046509015538033, 'pedal1_accuracy': 0.5786232461734694, 'pedal2_accuracy': 0.5789203820732839, 'pedal3_accuracy': 0.5814895205241187, 'pedal4_accuracy': 0.5815058267625232, 'pedal_value_mae': 0.902503188830802, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=False early_counter=2 peak_gpu_bytes=9356540416
+epoch 6 start train_batches=702 validation_batches=68
+training epoch=6 batch=1/702 loss=0.845688 global_step=3511
+training epoch=6 batch=100/702 loss=0.991908 global_step=3610
+training epoch=6 batch=200/702 loss=0.840422 global_step=3710
+training epoch=6 batch=300/702 loss=0.901623 global_step=3810
+training epoch=6 batch=400/702 loss=1.080021 global_step=3910
+training epoch=6 batch=500/702 loss=0.847256 global_step=4010
+training epoch=6 batch=600/702 loss=1.114129 global_step=4110
+training epoch=6 batch=700/702 loss=1.056913 global_step=4210
+validation epoch=6 batch=1/68 loss=1.096601 global_step=4212
+epoch 6 complete train={'loss': 0.9624125772859488, 'pedal_token_accuracy': 0.6194430075290501, 'exact_note_accuracy': 0.5230453012750648, 'pedal1_accuracy': 0.6182594511443161, 'pedal2_accuracy': 0.618061684429724, 'pedal3_accuracy': 0.6209045157254978, 'pedal4_accuracy': 0.6205463788166627, 'pedal_value_mae': 0.6638551586646462, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.156466247088834, 'pedal_token_accuracy': 0.5746440710517161, 'exact_note_accuracy': 0.4991937471011132, 'pedal1_accuracy': 0.5726569747217068, 'pedal2_accuracy': 0.5737821051716141, 'pedal3_accuracy': 0.5761827458256029, 'pedal4_accuracy': 0.5759544584879406, 'pedal_value_mae': 0.9115336742494013, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=False early_counter=3 peak_gpu_bytes=9356540416
+epoch 7 start train_batches=702 validation_batches=68
+training epoch=7 batch=1/702 loss=0.941342 global_step=4213
+training epoch=7 batch=100/702 loss=0.874607 global_step=4312
+training epoch=7 batch=200/702 loss=0.949697 global_step=4412
+training epoch=7 batch=300/702 loss=1.036025 global_step=4512
+training epoch=7 batch=400/702 loss=0.707174 global_step=4612
+training epoch=7 batch=500/702 loss=0.939237 global_step=4712
+training epoch=7 batch=600/702 loss=1.000513 global_step=4812
+training epoch=7 batch=700/702 loss=0.850124 global_step=4912
+validation epoch=7 batch=1/68 loss=1.083656 global_step=4914
+epoch 7 complete train={'loss': 0.9284631154675117, 'pedal_token_accuracy': 0.6334070856491636, 'exact_note_accuracy': 0.5367964366508163, 'pedal1_accuracy': 0.6323802032909633, 'pedal2_accuracy': 0.6318669143070043, 'pedal3_accuracy': 0.6349249060477653, 'pedal4_accuracy': 0.6344563189509215, 'pedal_value_mae': 0.6290660455081033, 'valid_target_count': 22996792, 'valid_note_count': 5749198} validation={'loss': 1.1459999004852353, 'pedal_token_accuracy': 0.5796650336270872, 'exact_note_accuracy': 0.5044280496289425, 'pedal1_accuracy': 0.5777336502782932, 'pedal2_accuracy': 0.5785018552875696, 'pedal3_accuracy': 0.5811507131261595, 'pedal4_accuracy': 0.5812739158163265, 'pedal_value_mae': 0.8987590952574211, 'valid_target_count': 2207744, 'valid_note_count': 551936} improved=False early_counter=4 peak_gpu_bytes=9356540416
+FIVE-CLASS RUN COMPLETE {"best_epoch": 3, "best_validation_loss": 1.1156102244177202, "completed_epoch": 7, "early_stopped": true, "encoder_initial_sha256": "4bfcd1c68006b148799675b126495e9af750215ae5ed77d63621f6139da2ebe4", "four_head_initial_sha256": ["c6b4967b55cd1583fa5e67476af8a581c6020bf042d775363d0672cd9e7a26ef", "f27b3db56320af4936e568c11a3e491bb34de4a7f2ca0c024b6effb3181559af", "20a393e0ea28045645ece48dea2b61c214d070c25643a2fd2a332c641dbb853a", "627428a05612b622389b4e9ee35a7e2cb55fa4f57e98ae6d04ea29a1ec5f69dc"], "global_optimizer_step": 4914, "initial_parameter_sha256": "513aa5d04790608d22fcab85f9183b283982cd567fd6aef9c077b7f3ab47dda0", "runtime_seconds": 1835.1775304190814, "stop_reason": "early_stopping", "train_performance_count": 892, "train_piece_count": 180, "validation_performance_count": 71, "validation_piece_count": 19}
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=1/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=10/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=20/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=30/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=40/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=50/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=60/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=70/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ce_128_shared performances=71/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=1/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=10/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=20/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=30/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=40/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=50/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=60/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=70/71
+FIVE_CLASS_VALIDATION_PROGRESS model=ordinal_lambda1 performances=71/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=1/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=10/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=20/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=30/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=40/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=50/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=60/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=70/71
+FIVE_CLASS_VALIDATION_PROGRESS model=coarse_to_fine_v0 performances=71/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=1/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=10/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=20/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=30/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=40/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=50/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=60/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=70/71
+FIVE_CLASS_VALIDATION_PROGRESS model=endpoint_aware_5class_argmax performances=71/71
+FIVE_CLASS_VALIDATION_COMPLETE {"notes": 283928, "passed": false, "performances": 71, "test_rows_used": 0}
+FIVE CLASS RUN COMPLETE best_epoch=3 best_validation_loss=1.1156102244177202 pass=False

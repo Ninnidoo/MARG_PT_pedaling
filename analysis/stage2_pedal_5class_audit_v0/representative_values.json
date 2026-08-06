@@ -1,0 +1,41 @@
+{
+  "source_split": "train",
+  "global_shared_representatives": {
+    "ZERO": 0.0,
+    "LOW": 48.0,
+    "MID": 77.0,
+    "HIGH": 108.0,
+    "FULL": 127.0
+  },
+  "slot_medians_reported_only_not_used_for_reconstruction": {
+    "Pedal1": {
+      "ZERO": 0.0,
+      "LOW": 48.0,
+      "MID": 77.0,
+      "HIGH": 108.0,
+      "FULL": 127.0
+    },
+    "Pedal2": {
+      "ZERO": 0.0,
+      "LOW": 48.0,
+      "MID": 77.0,
+      "HIGH": 108.0,
+      "FULL": 127.0
+    },
+    "Pedal3": {
+      "ZERO": 0.0,
+      "LOW": 48.0,
+      "MID": 77.0,
+      "HIGH": 108.0,
+      "FULL": 127.0
+    },
+    "Pedal4": {
+      "ZERO": 0.0,
+      "LOW": 48.0,
+      "MID": 78.0,
+      "HIGH": 108.0,
+      "FULL": 127.0
+    }
+  },
+  "all_slots_use_same_global_representatives": true
+}

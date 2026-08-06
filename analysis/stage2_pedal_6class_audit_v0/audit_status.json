@@ -1,0 +1,14 @@
+{
+  "run_id": "20260804T060246Z-11d3c2f6c93d",
+  "pid": 552,
+  "state": "completed",
+  "started_at_utc": "2026-08-04T06:02:46.347248+00:00",
+  "completed_at_utc": "2026-08-04T06:04:26.130312+00:00",
+  "elapsed_seconds": 99.78322240710258,
+  "model_training_performed": false,
+  "validation_test_midi_accessed": false,
+  "error": null,
+  "train_performance_count": 892,
+  "train_tokenized_pedal_target_count": 11954456,
+  "required_output_files_verified": true
+}

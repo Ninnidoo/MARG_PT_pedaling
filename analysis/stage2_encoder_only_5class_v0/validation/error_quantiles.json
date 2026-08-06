@@ -1,0 +1,59 @@
+{
+  "method": "numpy.quantile default linear interpolation",
+  "models": {
+    "ce_128_argmax": {
+      "median": 0.0,
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 56.0,
+      "q95": 127.0,
+      "q99": 127.0
+    },
+    "ce_128_posterior_median": {
+      "median": 11.0,
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 47.0,
+      "q95": 127.0,
+      "q99": 127.0
+    },
+    "coarse_to_fine_v0": {
+      "median": 0.0,
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 47.0,
+      "q95": 127.0,
+      "q99": 127.0
+    },
+    "endpoint_aware_5class_argmax": {
+      "median": 0.0,
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 47.0,
+      "q95": 127.0,
+      "q99": 127.0
+    },
+    "ordinal_lambda1_posterior_median": {
+      "median": 11.0,
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 47.0,
+      "q95": 127.0,
+      "q99": 127.0
+    }
+  },
+  "validation_quantization_oracle": {
+    "median": 0.0,
+    "q01": 0.0,
+    "q05": 0.0,
+    "q25": 0.0,
+    "q75": 4.0,
+    "q95": 19.0,
+    "q99": 29.0
+  }
+}

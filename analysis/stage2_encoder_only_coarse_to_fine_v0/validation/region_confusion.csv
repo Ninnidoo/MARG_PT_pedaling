@@ -1,0 +1,4 @@
+pred_full,pred_intermediate,pred_zero,true_region
+60023,59635,164752,zero
+115706,135095,104617,intermediate
+403278,65335,27271,full

@@ -1,0 +1,32 @@
+{
+  "asap_test_midi_accessed": false,
+  "errors": [],
+  "excluded_module": "test_stage2_dataset.py",
+  "excluded_reason": "contains a real ASAP smoke test that opens the test split",
+  "failures": [],
+  "modules": [
+    "test_stage2_five_class.py",
+    "test_stage2_five_class_runtime.py",
+    "test_stage2_ordinal.py",
+    "test_stage2_coarse_to_fine.py",
+    "test_stage2_calibration.py",
+    "test_stage2_posterior.py",
+    "test_stage2_model.py",
+    "test_stage2_training.py",
+    "test_stage2_train.py",
+    "test_stage2_evaluate.py",
+    "test_stage2_five_class_audit.py"
+  ],
+  "passed": true,
+  "passed_tests": 107,
+  "post_patch_runtime_tests": {
+    "errors": 0,
+    "failures": 0,
+    "passed_tests": 11,
+    "skipped": 0,
+    "total_tests": 11
+  },
+  "reused_from_interrupted_prelaunch": true,
+  "skipped": [],
+  "total_tests": 107
+}

@@ -1,0 +1,167 @@
+{
+  "amp_enabled": true,
+  "amp_init_scale": 1024.0,
+  "architecture": "official PT encoder + four independent Linear(768,5) heads",
+  "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1",
+  "asap_test_midi_accessed": false,
+  "batch_size": 16,
+  "cache_mode": "preload",
+  "checkpoint_path": "/workspace/project/checkpoints/pianist_transformer",
+  "class_boundaries": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      63
+    ],
+    [
+      64,
+      95
+    ],
+    [
+      96,
+      126
+    ],
+    [
+      127,
+      127
+    ]
+  ],
+  "class_names": [
+    "ZERO",
+    "LOW",
+    "MID",
+    "HIGH",
+    "FULL"
+  ],
+  "container_pid": 2536,
+  "container_visible_cuda_index": 0,
+  "cuda_version": "12.6",
+  "dataset_cache_mode": "preload",
+  "dataset_class": "Stage2PedalDataset",
+  "early_stopping_min_delta": 0.0001,
+  "early_stopping_patience": 4,
+  "encoder_initial_sha256": "4bfcd1c68006b148799675b126495e9af750215ae5ed77d63621f6139da2ebe4",
+  "encoder_lr": 1e-05,
+  "existing_run_action": {
+    "action": "new",
+    "archive_path": null,
+    "stale_lock_archives": []
+  },
+  "expected_gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+  "expected_train_performances": 892,
+  "expected_train_pieces": 180,
+  "expected_validation_performances": 71,
+  "expected_validation_pieces": 19,
+  "four_head_initial_sha256": [
+    "c6b4967b55cd1583fa5e67476af8a581c6020bf042d775363d0672cd9e7a26ef",
+    "f27b3db56320af4936e568c11a3e491bb34de4a7f2ca0c024b6effb3181559af",
+    "20a393e0ea28045645ece48dea2b61c214d070c25643a2fd2a332c641dbb853a",
+    "627428a05612b622389b4e9ee35a7e2cb55fa4f57e98ae6d04ea29a1ec5f69dc"
+  ],
+  "freeze_encoder": false,
+  "git_metadata": {
+    "commit": "1d64469760e963492897723c92e61ddad7c76a54",
+    "commit_source": "STAGE2_PROJECT_GIT_COMMIT",
+    "dirty": true,
+    "dirty_status": " M AGENTS.md\n D requirements-notion.txt\n?? .devcontainer/\n?? .dockerignore\n?? Dockerfile\n?? analysis/stage2_encoder_only_coarse_to_fine_v0/\n?? analysis/stage2_encoder_only_ordinal_v0/\n?? analysis/stage2_encoder_only_v0/\n?? analysis/stage2_pedal_5class_audit_v0/\n?? analysis/stage2_pedal_6class_audit_v0/\n?? docs/SERVER_DOCKER_SETUP.md\n?? docs/SERVER_WORKFLOW.md\n?? requirements-server.txt\n?? src/stage2_encoder_only/\n?? tests/test_stage2_calibration.py\n?? tests/test_stage2_coarse_to_fine.py\n?? tests/test_stage2_dataset.py\n?? tests/test_stage2_evaluate.py\n?? tests/test_stage2_five_class.py\n?? tests/test_stage2_five_class_audit.py\n?? tests/test_stage2_five_class_runtime.py\n?? tests/test_stage2_model.py\n?? tests/test_stage2_ordinal.py\n?? tests/test_stage2_posterior.py\n?? tests/test_stage2_six_class_audit.py\n?? tests/test_stage2_train.py\n?? tests/test_stage2_training.py\n",
+    "dirty_status_source": "STAGE2_PROJECT_GIT_STATUS_B64",
+    "warnings": []
+  },
+  "gpu_name": "NVIDIA GeForce RTX 2080 Ti",
+  "gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+  "head_lr": 0.0001,
+  "host_pid": 88491,
+  "initial_parameter_sha256": "513aa5d04790608d22fcab85f9183b283982cd567fd6aef9c077b7f3ab47dda0",
+  "input_grammar": [
+    "Pitch",
+    "IOI",
+    "Velocity",
+    "Duration",
+    "MASK",
+    "MASK",
+    "MASK",
+    "MASK"
+  ],
+  "launch_kst_timestamp": "2026-08-04T16:42:44.971093+09:00",
+  "launch_utc_timestamp": "2026-08-04T07:42:44.971084+00:00",
+  "loss": "standard_unweighted_5class_cross_entropy",
+  "loss_configuration": {
+    "class_weighting": null,
+    "classes": 5,
+    "ignore_index": -100,
+    "label_smoothing": 0.0,
+    "name": "unweighted_cross_entropy"
+  },
+  "max_epochs": 20,
+  "max_grad_norm": 1.0,
+  "num_workers": 0,
+  "output_dir": "/workspace/project/analysis/stage2_encoder_only_5class_v0",
+  "overlap_decoding": "average raw logits -> one argmax -> canonical representative",
+  "pianist_transformer_commit": "747df2d12291e37f6638b39f1b71517e579ad48c",
+  "pin_memory": true,
+  "pipeline_splits": [
+    "train",
+    "validation"
+  ],
+  "progress_interval": 100,
+  "project_git_commit": "1d64469760e963492897723c92e61ddad7c76a54",
+  "project_git_dirty": true,
+  "project_git_dirty_status": " M AGENTS.md\n D requirements-notion.txt\n?? .devcontainer/\n?? .dockerignore\n?? Dockerfile\n?? analysis/stage2_encoder_only_coarse_to_fine_v0/\n?? analysis/stage2_encoder_only_ordinal_v0/\n?? analysis/stage2_encoder_only_v0/\n?? analysis/stage2_pedal_5class_audit_v0/\n?? analysis/stage2_pedal_6class_audit_v0/\n?? docs/SERVER_DOCKER_SETUP.md\n?? docs/SERVER_WORKFLOW.md\n?? requirements-server.txt\n?? src/stage2_encoder_only/\n?? tests/test_stage2_calibration.py\n?? tests/test_stage2_coarse_to_fine.py\n?? tests/test_stage2_dataset.py\n?? tests/test_stage2_evaluate.py\n?? tests/test_stage2_five_class.py\n?? tests/test_stage2_five_class_audit.py\n?? tests/test_stage2_five_class_runtime.py\n?? tests/test_stage2_model.py\n?? tests/test_stage2_ordinal.py\n?? tests/test_stage2_posterior.py\n?? tests/test_stage2_six_class_audit.py\n?? tests/test_stage2_train.py\n?? tests/test_stage2_training.py\n",
+  "pytorch_version": "2.8.0+cu126",
+  "representative_policy": "canonical_interval_midpoint",
+  "representatives": [
+    0,
+    32,
+    80,
+    111,
+    127
+  ],
+  "resume": null,
+  "run_id": "20260804T074244Z-16e72a08637a",
+  "runtime_metadata": {
+    "container_hostname": "d3affcb5b8ad",
+    "container_name": "ilkyun-marg-pedaling-dev",
+    "container_repository_path": "/workspace/project",
+    "container_uid": 0,
+    "container_username": "root",
+    "container_visible_cuda_index": 0,
+    "cuda_version": "12.6",
+    "cuda_visible_devices": "0",
+    "gpu": {
+      "cuda_available": true,
+      "name": "NVIDIA GeForce RTX 2080 Ti",
+      "nvidia_smi_name": "NVIDIA GeForce RTX 2080 Ti",
+      "uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+      "visible_device_count": 1
+    },
+    "host_physical_gpu_mapping": "physical_gpu_1_to_container_cuda_0_GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+    "host_repository_path": "/home/intern_2026_summer/yimilkyun/MARG_PT_pedaling",
+    "host_uid": 1004,
+    "host_username": "intern_2026_summer",
+    "pytorch_version": "2.8.0+cu126",
+    "warnings": []
+  },
+  "scheduler": null,
+  "seed": 20260710,
+  "split_csv": "/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv",
+  "split_csv_sha256": "d1fe379eb123ff7abca93773296f735f40a215dcd6e6363b55756383708c965b",
+  "stride_notes": 256,
+  "test_rows_passed_to_pipeline": 0,
+  "test_split_passed_to_pipeline": false,
+  "tmux_session_name": "stage2-5class-v0",
+  "tokenizer": "pinned PT midi_to_ids/_PinnedTokenizerConfig",
+  "train_performance_count": 892,
+  "train_piece_count": 180,
+  "train_preload_seconds": 60.29547753930092,
+  "train_window_count": 11230,
+  "validation_performance_count": 71,
+  "validation_piece_count": 19,
+  "validation_preload_seconds": 5.240949474275112,
+  "validation_training_loss_overlap_policy": "window-level CE for checkpoint selection; final metrics are reconstructed",
+  "validation_window_count": 1078,
+  "weight_decay": 0.01,
+  "window_notes": 512
+}

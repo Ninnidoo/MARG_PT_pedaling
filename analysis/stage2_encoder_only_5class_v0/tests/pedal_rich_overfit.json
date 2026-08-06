@@ -1,0 +1,115 @@
+{
+  "active_encoder_changed": true,
+  "active_encoder_parameter": "embeddings.word_embeddings.weight",
+  "all_five_classes_present": true,
+  "all_losses_finite": true,
+  "all_metrics_finite": true,
+  "encoder_gradient_finite_nonzero": true,
+  "every_head_parameter_group_changed": true,
+  "every_head_received_finite_nonzero_gradient": true,
+  "final": {
+    "all_five_classes_predicted": true,
+    "ce_loss": 0.02398877590894699,
+    "decoded_mae_gap": 0.017822265625,
+    "exact_note_accuracy": 0.99658203125,
+    "per_class_recall": {
+      "FULL": 1.0,
+      "HIGH": 0.9951397326852977,
+      "LOW": 0.9995196926032661,
+      "MID": 1.0,
+      "ZERO": 0.9880952380952381
+    },
+    "predicted_class_counts": [
+      83,
+      4162,
+      2324,
+      819,
+      804
+    ],
+    "quantization_oracle_mae": 9.93798828125,
+    "representative_decoded_mae": 9.955810546875,
+    "target_class_counts": [
+      84,
+      4164,
+      2317,
+      823,
+      804
+    ],
+    "token_accuracy": 0.9991455078125
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 2080 Ti",
+    "uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b"
+  },
+  "head_groups_changed": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "initial": {
+    "all_five_classes_predicted": true,
+    "ce_loss": 1.9272019863128662,
+    "decoded_mae_gap": 36.4683837890625,
+    "exact_note_accuracy": 0.0009765625,
+    "per_class_recall": {
+      "FULL": 0.01616915422885572,
+      "HIGH": 0.267314702308627,
+      "LOW": 0.3712776176753122,
+      "MID": 0.156236512731981,
+      "ZERO": 0.21428571428571427
+    },
+    "predicted_class_counts": [
+      1639,
+      3054,
+      1101,
+      2275,
+      123
+    ],
+    "quantization_oracle_mae": 9.93798828125,
+    "representative_decoded_mae": 46.4063720703125,
+    "target_class_counts": [
+      84,
+      4164,
+      2317,
+      823,
+      804
+    ],
+    "token_accuracy": 0.2635498046875
+  },
+  "oom": false,
+  "overfit_optimizer": {
+    "encoder_lr": 0.0001,
+    "head_lr": 0.001,
+    "max_grad_norm": 1.0,
+    "name": "AdamW",
+    "weight_decay": 0.0
+  },
+  "passed": true,
+  "peak_gpu_memory_bytes": 2497611264,
+  "performance_path": "Schubert/Piano_Sonatas/664-3/Lin07.mid",
+  "source_split": "train",
+  "steps": 25,
+  "subset_canonical_quantization_oracle_mae": 9.93798828125,
+  "target_class_counts": [
+    84,
+    4164,
+    2317,
+    823,
+    804
+  ],
+  "target_class_distribution": [
+    0.01025390625,
+    0.50830078125,
+    0.2828369140625,
+    0.1004638671875,
+    0.09814453125
+  ],
+  "test_split_accessed": false,
+  "window_starts": [
+    0,
+    256,
+    512,
+    768
+  ]
+}

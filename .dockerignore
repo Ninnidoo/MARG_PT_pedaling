@@ -1,0 +1,8 @@
+# This image contains only the Python/CUDA environment. Source code, Git
+# metadata, datasets, checkpoints, outputs, secrets, and third-party trees are
+# supplied at runtime through explicit bind mounts.
+**
+
+!Dockerfile
+!.dockerignore
+!requirements-server.txt

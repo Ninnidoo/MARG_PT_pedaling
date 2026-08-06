@@ -1,0 +1,81 @@
+{
+  "best_epochs": {
+    "0.1": 2,
+    "0.5": 2,
+    "1.0": 2
+  },
+  "best_validation_losses": {
+    "0.1": 2.26104905388572,
+    "0.5": 2.3216739857572795,
+    "1.0": 2.396898931165352
+  },
+  "completed_lambdas": [
+    0.1,
+    0.5,
+    1.0
+  ],
+  "current_lambda": null,
+  "current_stage": "complete",
+  "end_time": "2026-08-03T10:18:14.151233+00:00",
+  "failure_message": null,
+  "gpu": {
+    "compute_processes": "",
+    "memory_total_mib": 11264,
+    "memory_used_mib": 6,
+    "name": "NVIDIA GeForce RTX 2080 Ti",
+    "utilization_percent": 0,
+    "uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b"
+  },
+  "last_completed_epoch": 6,
+  "overfit_validation": {
+    "active_encoder_changed": true,
+    "active_encoder_parameter": "embeddings.word_embeddings.weight",
+    "all_metrics_finite": true,
+    "encoder_gradient_finite_nonzero": true,
+    "every_head_parameter_group_changed": true,
+    "every_head_received_finite_nonzero_gradient": true,
+    "final": {
+      "ce_loss": 0.027558820322155952,
+      "exact_note_accuracy": 1.0,
+      "intermediate_argmax_prediction_ratio": 1.0,
+      "intermediate_target_mae": 0.0,
+      "intermediate_top10_recall": 1.0,
+      "mae": 0.0,
+      "mean_intermediate_true_class_rank": 1.0,
+      "ordinal_loss": 0.00013702677097171545,
+      "total_loss": 0.027695847675204277
+    },
+    "initial": {
+      "ce_loss": 5.392951488494873,
+      "exact_note_accuracy": 0.0,
+      "intermediate_argmax_prediction_ratio": 0.9945235848426819,
+      "intermediate_target_mae": 40.612815856933594,
+      "intermediate_top10_recall": 0.09104600219058051,
+      "mae": 43.4549560546875,
+      "mean_intermediate_true_class_rank": 62.184419496166484,
+      "ordinal_loss": 0.16568128764629364,
+      "total_loss": 5.558632850646973
+    },
+    "oom": false,
+    "passed": true,
+    "performance_path": "Schubert/Piano_Sonatas/664-3/Lin07.mid",
+    "steps": 30,
+    "window_starts": [
+      0,
+      256,
+      512,
+      768
+    ]
+  },
+  "process_id": 6418,
+  "start_time": "2026-08-03T08:58:26.517433+00:00",
+  "status": "complete",
+  "tmux_session_name": "stage2-ordinal-sweep-v0",
+  "validation_comparison": {
+    "performance_count": 71,
+    "piece_count": 19,
+    "retained_ce_baseline": true,
+    "row_count": 8,
+    "selected": null
+  }
+}

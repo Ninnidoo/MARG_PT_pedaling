@@ -1,0 +1,134 @@
+{
+  "not_model_performance": true,
+  "interpretation": "Information loss caused solely by replacing each original train Pedal target with its fixed-class train-derived representative.",
+  "overall_micro": {
+    "mae": 3.0202310335158704,
+    "maximum_absolute_error": 21.0,
+    "error_quantiles": {
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 5.0,
+      "q95": 14.0,
+      "q99": 18.0
+    },
+    "tolerance_accuracy": {
+      "plus_minus_5": 0.7548916487709687,
+      "plus_minus_10": 0.8914114536035768,
+      "plus_minus_20": 0.9979007827708763
+    }
+  },
+  "intermediate_only_original_1_to_126": {
+    "mae": 7.77618234730087,
+    "maximum_absolute_error": 21.0,
+    "error_quantiles": {
+      "q01": 0.0,
+      "q05": 1.0,
+      "q25": 4.0,
+      "median": 7.0,
+      "q75": 11.0,
+      "q95": 17.0,
+      "q99": 20.0
+    },
+    "tolerance_accuracy": {
+      "plus_minus_5": 0.3689200551706076,
+      "plus_minus_10": 0.7204173031014944,
+      "plus_minus_20": 0.9945951499143236
+    }
+  },
+  "per_slot": {
+    "Pedal1": {
+      "mae": 3.0372269553712856,
+      "maximum_absolute_error": 21.0,
+      "error_quantiles": {
+        "q01": 0.0,
+        "q05": 0.0,
+        "q25": 0.0,
+        "median": 0.0,
+        "q75": 5.0,
+        "q95": 14.0,
+        "q99": 18.0
+      },
+      "tolerance_accuracy": {
+        "plus_minus_5": 0.7535101555436734,
+        "plus_minus_10": 0.890961495863969,
+        "plus_minus_20": 0.997899026103739
+      }
+    },
+    "Pedal2": {
+      "mae": 3.0328513484846154,
+      "maximum_absolute_error": 21.0,
+      "error_quantiles": {
+        "q01": 0.0,
+        "q05": 0.0,
+        "q25": 0.0,
+        "median": 0.0,
+        "q75": 5.0,
+        "q95": 14.0,
+        "q99": 18.0
+      },
+      "tolerance_accuracy": {
+        "plus_minus_5": 0.7535713879410322,
+        "plus_minus_10": 0.8912184711709173,
+        "plus_minus_20": 0.9978501740271577
+      }
+    },
+    "Pedal3": {
+      "mae": 3.0071049657132036,
+      "maximum_absolute_error": 21.0,
+      "error_quantiles": {
+        "q01": 0.0,
+        "q05": 0.0,
+        "q25": 0.0,
+        "median": 0.0,
+        "q75": 5.0,
+        "q95": 14.0,
+        "q99": 18.0
+      },
+      "tolerance_accuracy": {
+        "plus_minus_5": 0.7560929581404624,
+        "plus_minus_10": 0.8917394484533633,
+        "plus_minus_20": 0.9979314826203719
+      }
+    },
+    "Pedal4": {
+      "mae": 3.0037408644943775,
+      "maximum_absolute_error": 21.0,
+      "error_quantiles": {
+        "q01": 0.0,
+        "q05": 0.0,
+        "q25": 0.0,
+        "median": 0.0,
+        "q75": 5.0,
+        "q95": 14.0,
+        "q99": 18.0
+      },
+      "tolerance_accuracy": {
+        "plus_minus_5": 0.756392093458707,
+        "plus_minus_10": 0.8917263989260573,
+        "plus_minus_20": 0.997922448332237
+      }
+    }
+  },
+  "performance_macro_mae": {
+    "count": 892,
+    "mean": 3.0876257343199383,
+    "median": 2.8846872728975823,
+    "std": 1.9591887203498672,
+    "min": 0.0,
+    "max": 13.218918918918918,
+    "q05": 0.34323169833554285,
+    "q25": 1.5730884791031543,
+    "q75": 4.331584426900216,
+    "q95": 6.484726623533087
+  },
+  "class_within_bin_mae": {
+    "ZERO": 0.0,
+    "LOW": 5.839954075774972,
+    "MID_LOW": 7.73149961069891,
+    "MID_HIGH": 7.975701244500177,
+    "HIGH": 8.190528472295671,
+    "FULL": 0.0
+  }
+}

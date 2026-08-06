@@ -1,2 +1,0 @@
-﻿# Dependencies for scripts/publish_session_to_notion.py
-requests>=2.31,<3

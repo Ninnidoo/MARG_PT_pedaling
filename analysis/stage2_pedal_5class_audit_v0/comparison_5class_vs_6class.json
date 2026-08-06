@@ -1,0 +1,118 @@
+{
+  "same_train_split_sha256": "d1fe379eb123ff7abca93773296f735f40a215dcd6e6363b55756383708c965b",
+  "five_class": {
+    "run_id": "20260804T061750Z-ab88a7fee696",
+    "train_performance_count": 892,
+    "token_count": 11954456,
+    "class_count": 5,
+    "class_counts": [
+      2975658,
+      1758841,
+      2014383,
+      869828,
+      4335746
+    ],
+    "max_min_imbalance_ratio": 4.98460155341056,
+    "representative_values": [
+      0.0,
+      48.0,
+      77.0,
+      108.0,
+      127.0
+    ],
+    "overall_oracle_mae": 3.727680205607014,
+    "intermediate_only_oracle_mae": 9.597650209388135,
+    "performance_macro_mae": 3.918835167356439,
+    "tolerance_accuracy": {
+      "plus_minus_5": 0.7322711296942328,
+      "plus_minus_10": 0.8460271216021875,
+      "plus_minus_20": 0.9769955236775308
+    },
+    "maximum_absolute_error": 40.0,
+    "error_quantiles": {
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 6.0,
+      "q95": 16.0,
+      "q99": 30.0
+    },
+    "exact_transition_preservation": 0.4626274549236925,
+    "binary_transition_preservation": 1.0,
+    "transition_direction_agreement": 1.0,
+    "new_transitions": 0,
+    "short_repedal_original": 74248,
+    "short_repedal_quantized": 74248,
+    "short_repedal_preservation": 1.0
+  },
+  "six_class": {
+    "source_directory": "/workspace/project/analysis/stage2_pedal_6class_audit_v0",
+    "run_id": "20260804T060246Z-11d3c2f6c93d",
+    "train_performance_count": 892,
+    "token_count": 11954456,
+    "class_count": 6,
+    "class_counts": [
+      2975658,
+      361465,
+      1397376,
+      2014383,
+      869828,
+      4335746
+    ],
+    "max_min_imbalance_ratio": 11.994926203090202,
+    "representative_values": [
+      0.0,
+      22.0,
+      53.0,
+      77.0,
+      108.0,
+      127.0
+    ],
+    "overall_oracle_mae": 3.0202310335158704,
+    "intermediate_only_oracle_mae": 7.77618234730087,
+    "performance_macro_mae": 3.0876257343199383,
+    "tolerance_accuracy": {
+      "plus_minus_5": 0.7548916487709687,
+      "plus_minus_10": 0.8914114536035768,
+      "plus_minus_20": 0.9979007827708763
+    },
+    "maximum_absolute_error": 21.0,
+    "error_quantiles": {
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 5.0,
+      "q95": 14.0,
+      "q99": 18.0
+    },
+    "exact_transition_preservation": 0.48914444579751826,
+    "binary_transition_preservation": 1.0,
+    "transition_direction_agreement": 1.0,
+    "new_transitions": 0,
+    "short_repedal_original": 74248,
+    "short_repedal_quantized": 74248,
+    "short_repedal_preservation": 1.0
+  },
+  "five_class_adoption_criteria": {
+    "overall_oracle_mae_max": 4.0,
+    "intermediate_only_oracle_mae_max": 10.0,
+    "plus_minus_10_accuracy_min": 0.85,
+    "binary_transition_preservation_required": 1.0,
+    "short_repedal_preservation_required": 1.0,
+    "all_five_classes_present_required": true,
+    "new_transitions_required": 0
+  },
+  "five_class_criterion_checks": {
+    "overall_oracle_mae_le_4": true,
+    "intermediate_only_oracle_mae_le_10": true,
+    "plus_minus_10_accuracy_ge_85_percent": false,
+    "binary_transition_preservation_100_percent": true,
+    "short_repedal_preservation_100_percent": true,
+    "all_five_classes_present": true,
+    "no_new_transitions": true
+  },
+  "all_criteria_passed": false,
+  "recommendation": "retain_6class"
+}

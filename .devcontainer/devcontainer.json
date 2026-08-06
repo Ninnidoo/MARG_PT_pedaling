@@ -1,0 +1,61 @@
+{
+  "name": "MARG Pianist Transformer (PyTorch 2.7.1 / CUDA 11.8)",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": "..",
+    "args": {
+      "USERNAME": "research",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+  "workspaceMount": "source=/home/intern_2026_summer/yimilkyun/MARG_PT_pedaling,target=/workspace/project,type=bind",
+  "workspaceFolder": "/workspace/project",
+  "mounts": [
+    "source=/public/intern_2026_summer_public_dataset/ilkyun_data,target=/workspace/public,type=bind,readonly",
+    "source=/private/intern_2026_summer_private_dataset/ilkyun_data,target=/workspace/private,type=bind"
+  ],
+  "runArgs": [
+    "--gpus",
+    "device=GPU-c6fcf288-c0d2-af93-4b99-579fb2817af0",
+    "--shm-size=4g",
+    "--security-opt=no-new-privileges:true",
+    "--label=owner=yimilkyun",
+    "--label=project=MARG_PT_pedaling"
+  ],
+  "containerEnv": {
+    "PROJECT_ROOT": "/workspace/project",
+    "PUBLIC_DATA_ROOT": "/workspace/public",
+    "PRIVATE_DATA_ROOT": "/workspace/private",
+    "PIANIST_TRANSFORMER_ROOT": "/workspace/project/third_party/PianistTransformer",
+    "HF_HOME": "/workspace/private/cache/huggingface",
+    "HF_HUB_CACHE": "/workspace/private/cache/huggingface/hub",
+    "MPLCONFIGDIR": "/workspace/private/cache/matplotlib",
+    "WANDB_DIR": "/workspace/private/logs/wandb",
+    "WANDB_CACHE_DIR": "/workspace/private/cache/wandb",
+    "TOKENIZERS_PARALLELISM": "false"
+  },
+  "remoteUser": "research",
+  "containerUser": "research",
+  "updateRemoteUserUID": true,
+  "overrideCommand": true,
+  "init": true,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/conda/bin/python",
+        "python.terminal.activateEnvironment": false,
+        "python.analysis.extraPaths": [
+          "/workspace/project/third_party/PianistTransformer"
+        ],
+        "terminal.integrated.cwd": "/workspace/project",
+        "git.enabled": false
+      }
+    }
+  }
+}

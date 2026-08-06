@@ -1,0 +1,17 @@
+{
+  "run_id": "20260804T061750Z-ab88a7fee696",
+  "pid": 688,
+  "state": "completed",
+  "started_at_utc": "2026-08-04T06:17:50.146947+00:00",
+  "completed_at_utc": "2026-08-04T06:18:47.003412+00:00",
+  "elapsed_seconds": 56.85686747357249,
+  "model_training_performed": false,
+  "validation_test_midi_accessed": false,
+  "existing_six_class_outputs_modified": false,
+  "error": null,
+  "train_performance_count": 892,
+  "train_tokenized_pedal_target_count": 11954456,
+  "all_adoption_criteria_passed": false,
+  "recommendation": "retain_6class",
+  "required_output_files_verified": true
+}

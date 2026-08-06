@@ -1,0 +1,45 @@
+{
+  "amp_enabled": true,
+  "amp_init_scale": 1024.0,
+  "architecture": "official PT encoder + four Linear(768,3) region heads + four Linear(768,1) depth heads",
+  "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1",
+  "batch_size": 16,
+  "checkpoint_path": "/workspace/project/checkpoints/pianist_transformer",
+  "depth_head_initial_sha256": [
+    "e2e4caecac33fb8d8f19979be307887a3761903fe83e866e79cbfe4a6a9d774f",
+    "cc51abd39546feec1a9f62f17693f182b378d91281888426ee6035abdcfebf55",
+    "96fb05e8cde604bce770ea3f417e1ca5078051a8c3daaf28e8305d36d3e86980",
+    "d4e9a6fb48500871359fd4d1b20d06adcc577c5ac47ebc106b80820f8a6d355b"
+  ],
+  "early_stopping_min_delta": 0.0001,
+  "early_stopping_patience": 4,
+  "encoder_initial_sha256": "4bfcd1c68006b148799675b126495e9af750215ae5ed77d63621f6139da2ebe4",
+  "encoder_lr": 1e-05,
+  "expected_gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+  "head_lr": 0.0001,
+  "loss_configuration": {
+    "depth_loss": "smooth_l1",
+    "depth_target": "(target-1)/125 for true intermediate only",
+    "lambda_depth": 1.0,
+    "region_loss": "unweighted_cross_entropy",
+    "smooth_l1_beta": 0.05
+  },
+  "max_epochs": 20,
+  "max_grad_norm": 1.0,
+  "output_dir": "/workspace/project/analysis/stage2_encoder_only_coarse_to_fine_v0",
+  "pianist_transformer_commit": "747df2d12291e37f6638b39f1b71517e579ad48c",
+  "pin_memory": true,
+  "project_git_commit": "1d64469760e963492897723c92e61ddad7c76a54",
+  "project_git_dirty_status": " M AGENTS.md\n D requirements-notion.txt\n?? .devcontainer/\n?? .dockerignore\n?? Dockerfile\n?? analysis/stage2_encoder_only_coarse_to_fine_v0/\n?? analysis/stage2_encoder_only_ordinal_v0/\n?? analysis/stage2_encoder_only_v0/\n?? docs/SERVER_DOCKER_SETUP.md\n?? docs/SERVER_WORKFLOW.md\n?? requirements-server.txt\n?? src/stage2_encoder_only/\n?? tests/test_stage2_calibration.py\n?? tests/test_stage2_coarse_to_fine.py\n?? tests/test_stage2_dataset.py\n?? tests/test_stage2_evaluate.py\n?? tests/test_stage2_model.py\n?? tests/test_stage2_ordinal.py\n?? tests/test_stage2_posterior.py\n?? tests/test_stage2_train.py\n?? tests/test_stage2_training.py\n",
+  "project_git_status": "unknown",
+  "region_head_initial_sha256": [
+    "75b817d40ea8464d00190adc9c229fc8ad685cdae93f2c32b79858616ce327a9",
+    "6c884e6fab7a27a3678252131b1d0468c7556b7c20cd4614620421fc91ead55c",
+    "908fcf7d1c9999377f45eb8aa35cef64be7b6aa1eeb54bcb2197bb980bcbb3a1",
+    "e509b690865fc7e8fdfa5fb61590673e08cf8aefc089b0c29cf4542528624bb2"
+  ],
+  "resume": null,
+  "seed": 20260710,
+  "split_csv": "/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv",
+  "weight_decay": 0.01
+}

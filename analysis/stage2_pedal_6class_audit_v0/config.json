@@ -1,0 +1,70 @@
+{
+  "run_id": "20260804T060246Z-11d3c2f6c93d",
+  "pid": 552,
+  "started_at_utc": "2026-08-04T06:02:46.347248+00:00",
+  "hostname": "d3affcb5b8ad",
+  "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1",
+  "split_csv": "/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv",
+  "split_csv_sha256": "d1fe379eb123ff7abca93773296f735f40a215dcd6e6363b55756383708c965b",
+  "split": "train",
+  "data_access_policy": "Only rows whose split field is exactly 'train' are loaded; validation/test MIDI are never opened.",
+  "tokenizer": "Pinned Pianist Transformer midi_to_ids via Stage2PedalDataset(cache_mode='preload')",
+  "dataset_cache": "Stage2PedalDataset immutable int16 in-memory per-performance preload cache",
+  "class_definition": [
+    {
+      "class_id": 0,
+      "name": "ZERO",
+      "minimum": 0,
+      "maximum": 0
+    },
+    {
+      "class_id": 1,
+      "name": "LOW",
+      "minimum": 1,
+      "maximum": 31
+    },
+    {
+      "class_id": 2,
+      "name": "MID_LOW",
+      "minimum": 32,
+      "maximum": 63
+    },
+    {
+      "class_id": 3,
+      "name": "MID_HIGH",
+      "minimum": 64,
+      "maximum": 95
+    },
+    {
+      "class_id": 4,
+      "name": "HIGH",
+      "minimum": 96,
+      "maximum": 126
+    },
+    {
+      "class_id": 5,
+      "name": "FULL",
+      "minimum": 127,
+      "maximum": 127
+    }
+  ],
+  "representative_policy": "ZERO=0; FULL=127; each interior class=global train Pedal1-4 median; shared by all slots",
+  "transition_definition": "Within each performance only, flatten row-major as note-major Pedal1,Pedal2,Pedal3,Pedal4; an original transition is adjacent values differing; preservation means the class also differs at that same boundary.",
+  "repedal_definition": "HIGH->LOW->HIGH state runs with LOW run <= 4 flattened pedal samples; threshold and extreme-bin variants plus 1/2/4/8-sample sensitivity are reported.",
+  "model_training": false,
+  "git": {
+    "available": false,
+    "commit": null,
+    "error": "FileNotFoundError: [Errno 2] No such file or directory: 'git'"
+  },
+  "train_performance_count": 892,
+  "train_piece_count": 180,
+  "normalized_note_count": 2988614,
+  "tokenized_pedal_target_count": 11954456,
+  "raw_cc64_event_count": 3848103,
+  "cached_performance_count": 892,
+  "cached_token_count_all_8_columns": 23908912,
+  "cached_nbytes": 47817824,
+  "controlled_training_audit_decision": "proceed",
+  "completed_at_utc": "2026-08-04T06:04:26.127781+00:00"
+}

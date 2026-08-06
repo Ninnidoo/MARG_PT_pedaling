@@ -1,0 +1,14 @@
+{
+  "best_epoch": 3,
+  "best_validation_total_loss": 0.9594596367820074,
+  "completed": true,
+  "current_epoch": 7,
+  "elapsed_seconds": 1765.2689688391984,
+  "failed": false,
+  "failure_reason": null,
+  "gpu_name": "NVIDIA GeForce RTX 2080 Ti",
+  "launch_command": "python -m src.stage2_encoder_only.run_coarse_to_fine --output-dir /workspace/project/analysis/stage2_encoder_only_coarse_to_fine_v0",
+  "peak_memory_bytes": 9352712704,
+  "stage": "complete",
+  "tmux_session_name": "stage2-ctf-v0"
+}

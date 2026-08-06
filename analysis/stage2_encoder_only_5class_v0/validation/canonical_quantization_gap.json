@@ -1,0 +1,260 @@
+{
+  "models": {
+    "ce_128_argmax": {
+      "decoded_metrics": {
+        "decoded_transition_direction_accuracy": 0.053621669333039114,
+        "decoded_transition_f1": 0.1160548854639116,
+        "decoded_transition_precision": 0.23867075971921087,
+        "decoded_transition_recall": 0.07666740221768632,
+        "delta_mae": 7.839006340912313,
+        "error_quantiles": {
+          "median": 0.0,
+          "q01": 0.0,
+          "q05": 0.0,
+          "q25": 0.0,
+          "q75": 56.0,
+          "q95": 127.0,
+          "q99": 127.0
+        },
+        "exact_value_transition_accuracy": 0.10699509019694378,
+        "maximum_absolute_error": 127,
+        "median_performance_mae": 30.575388523610282,
+        "on_region_mae": 22.05786070425832,
+        "overall_micro_mae": 30.86541922600096,
+        "per_slot_mae": {
+          "Pedal1": 30.913770392493873,
+          "Pedal2": 31.08634231213547,
+          "Pedal3": 30.742550928404384,
+          "Pedal4": 30.719013270970105
+        },
+        "performance_count": 71,
+        "performance_macro_mae": 29.528470064464777,
+        "steady_position_decoded_accuracy": 0.6388986750788643,
+        "subthreshold_region_mae": 56.04884009311162,
+        "target_count": 1135712,
+        "tolerance_accuracy": {
+          "plus_minus_10": 0.5914166619706405,
+          "plus_minus_20": 0.6117395959539038,
+          "plus_minus_5": 0.5851985362486264
+        },
+        "zero_target_mae": 40.74752645828206
+      },
+      "model_minus_oracle_on_region_mae": 19.46075640276253,
+      "model_minus_oracle_overall_mae": 27.23014901665211
+    },
+    "ce_128_posterior_median": {
+      "decoded_metrics": {
+        "decoded_transition_direction_accuracy": 0.1462597230650411,
+        "decoded_transition_f1": 0.2020910663272247,
+        "decoded_transition_precision": 0.19054395758767698,
+        "decoded_transition_recall": 0.21512798587742044,
+        "delta_mae": 7.225409262258055,
+        "error_quantiles": {
+          "median": 11.0,
+          "q01": 0.0,
+          "q05": 0.0,
+          "q25": 0.0,
+          "q75": 47.0,
+          "q95": 127.0,
+          "q99": 127.0
+        },
+        "exact_value_transition_accuracy": 0.05835907761902135,
+        "maximum_absolute_error": 127,
+        "median_performance_mae": 27.9088976459608,
+        "on_region_mae": 19.22786559630391,
+        "overall_micro_mae": 28.44264919275309,
+        "per_slot_mae": {
+          "Pedal1": 28.454491983883237,
+          "Pedal2": 28.56381547434561,
+          "Pedal3": 28.319260516750724,
+          "Pedal4": 28.433028796032797
+        },
+        "performance_count": 71,
+        "performance_macro_mae": 26.642831236397758,
+        "steady_position_decoded_accuracy": 0.5059240378548896,
+        "subthreshold_region_mae": 42.37665972922211,
+        "target_count": 1135712,
+        "tolerance_accuracy": {
+          "plus_minus_10": 0.4969023837029106,
+          "plus_minus_20": 0.5845751387675748,
+          "plus_minus_5": 0.4765336634639768
+        },
+        "zero_target_mae": 44.80061179283429
+      },
+      "model_minus_oracle_on_region_mae": 16.63076129480812,
+      "model_minus_oracle_overall_mae": 24.80737898340424
+    },
+    "coarse_to_fine_v0": {
+      "decoded_metrics": {
+        "decoded_transition_direction_accuracy": 0.14104650521321785,
+        "decoded_transition_f1": 0.21998445105213318,
+        "decoded_transition_precision": 0.23619891601060253,
+        "decoded_transition_recall": 0.20585314723892537,
+        "delta_mae": 8.549148014205194,
+        "error_quantiles": {
+          "median": 0.0,
+          "q01": 0.0,
+          "q05": 0.0,
+          "q25": 0.0,
+          "q75": 47.0,
+          "q95": 127.0,
+          "q99": 127.0
+        },
+        "exact_value_transition_accuracy": 0.07588128206542727,
+        "maximum_absolute_error": 127,
+        "median_performance_mae": 27.966684804115552,
+        "on_region_mae": 21.018438386157612,
+        "overall_micro_mae": 28.329023555267533,
+        "per_slot_mae": {
+          "Pedal1": 28.249774590741314,
+          "Pedal2": 28.299322363416078,
+          "Pedal3": 28.297357076441916,
+          "Pedal4": 28.469640190470823
+        },
+        "performance_count": 71,
+        "performance_macro_mae": 27.00093682384151,
+        "steady_position_decoded_accuracy": 0.5639984858044164,
+        "subthreshold_region_mae": 43.320393911485944,
+        "target_count": 1135712,
+        "tolerance_accuracy": {
+          "plus_minus_10": 0.5493478980586628,
+          "plus_minus_20": 0.5946578005691584,
+          "plus_minus_5": 0.5297725127497112
+        },
+        "zero_target_mae": 39.39789740163848
+      },
+      "model_minus_oracle_on_region_mae": 18.421334084661822,
+      "model_minus_oracle_overall_mae": 24.693753345918683
+    },
+    "endpoint_aware_5class_argmax": {
+      "decoded_metrics": {
+        "decoded_transition_direction_accuracy": 0.11917995255695923,
+        "decoded_transition_f1": 0.21085524775321318,
+        "decoded_transition_precision": 0.275538247566064,
+        "decoded_transition_recall": 0.1707673636012578,
+        "delta_mae": 7.948861479992357,
+        "error_quantiles": {
+          "median": 0.0,
+          "q01": 0.0,
+          "q05": 0.0,
+          "q25": 0.0,
+          "q75": 47.0,
+          "q95": 127.0,
+          "q99": 127.0
+        },
+        "exact_value_transition_accuracy": 0.0950446847244442,
+        "maximum_absolute_error": 127,
+        "median_performance_mae": 28.6976899485556,
+        "on_region_mae": 22.016125527927414,
+        "overall_micro_mae": 28.764686822011214,
+        "per_slot_mae": {
+          "Pedal1": 28.825871347665604,
+          "Pedal2": 28.828896762559523,
+          "Pedal3": 28.699275872756473,
+          "Pedal4": 28.704703305063255
+        },
+        "performance_count": 71,
+        "performance_macro_mae": 27.46777780720563,
+        "steady_position_decoded_accuracy": 0.6140335646687697,
+        "subthreshold_region_mae": 48.430191662013506,
+        "target_count": 1135712,
+        "tolerance_accuracy": {
+          "plus_minus_10": 0.5834709856019836,
+          "plus_minus_20": 0.6166211152123073,
+          "plus_minus_5": 0.5699288199825308
+        },
+        "zero_target_mae": 36.15750149432158
+      },
+      "model_minus_oracle_on_region_mae": 19.419021226431624,
+      "model_minus_oracle_overall_mae": 25.129416612662364
+    },
+    "ordinal_lambda1_posterior_median": {
+      "decoded_metrics": {
+        "decoded_transition_direction_accuracy": 0.151369504054725,
+        "decoded_transition_f1": 0.20604829246808523,
+        "decoded_transition_precision": 0.1929995724102212,
+        "decoded_transition_recall": 0.22098940806531692,
+        "delta_mae": 7.254869276470293,
+        "error_quantiles": {
+          "median": 11.0,
+          "q01": 0.0,
+          "q05": 0.0,
+          "q25": 0.0,
+          "q75": 47.0,
+          "q95": 127.0,
+          "q99": 127.0
+        },
+        "exact_value_transition_accuracy": 0.05838666078225851,
+        "maximum_absolute_error": 127,
+        "median_performance_mae": 27.831368899917287,
+        "on_region_mae": 19.13127643141394,
+        "overall_micro_mae": 28.378264031726353,
+        "per_slot_mae": {
+          "Pedal1": 28.386013355498577,
+          "Pedal2": 28.4854928009918,
+          "Pedal3": 28.268226451776506,
+          "Pedal4": 28.37332351863853
+        },
+        "performance_count": 71,
+        "performance_macro_mae": 26.531018428623486,
+        "steady_position_decoded_accuracy": 0.5057534384858045,
+        "subthreshold_region_mae": 42.190472737293234,
+        "target_count": 1135712,
+        "tolerance_accuracy": {
+          "plus_minus_10": 0.4970001197486687,
+          "plus_minus_20": 0.5838645712997661,
+          "plus_minus_5": 0.4765900157786481
+        },
+        "zero_target_mae": 44.876062726345765
+      },
+      "model_minus_oracle_on_region_mae": 16.53417212991815,
+      "model_minus_oracle_overall_mae": 24.742993822377503
+    }
+  },
+  "representative_policy": "fixed dataset-independent interval midpoints",
+  "representatives": [
+    0,
+    32,
+    80,
+    111,
+    127
+  ],
+  "validation_quantization_oracle": {
+    "decoded_transition_direction_accuracy": 0.521328680973134,
+    "decoded_transition_f1": 0.6853596957623393,
+    "decoded_transition_precision": 1.0,
+    "decoded_transition_recall": 0.521328680973134,
+    "delta_mae": 1.434443631394076,
+    "error_quantiles": {
+      "median": 0.0,
+      "q01": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 4.0,
+      "q95": 19.0,
+      "q99": 29.0
+    },
+    "exact_value_transition_accuracy": 0.18465548629116788,
+    "maximum_absolute_error": 31,
+    "median_performance_mae": 3.4748825352394284,
+    "on_region_mae": 2.5971043014957886,
+    "overall_micro_mae": 3.635270209348849,
+    "per_slot_mae": {
+      "Pedal1": 3.654623707418782,
+      "Pedal2": 3.6714624834465077,
+      "Pedal3": 3.616568284917303,
+      "Pedal4": 3.598426361612803
+    },
+    "performance_count": 71,
+    "performance_macro_mae": 4.171420050076859,
+    "steady_position_decoded_accuracy": 0.7683290851735016,
+    "subthreshold_region_mae": 16.503658474680744,
+    "target_count": 1135712,
+    "tolerance_accuracy": {
+      "plus_minus_10": 0.8387918768138402,
+      "plus_minus_20": 0.9544911033783212,
+      "plus_minus_5": 0.7662065734975064
+    },
+    "zero_target_mae": 0.0
+  }
+}

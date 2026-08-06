@@ -1,0 +1,725 @@
+"""Reusable full-training CLI for Stage 2 encoder-only pedal prediction."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import os
+import signal
+import subprocess
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import torch
+from torch.utils.data import DataLoader, Subset
+
+from .dataset import Stage2PedalDataset, stage2_pedal_collate_fn
+from .model import Stage2PedalEncoderModel
+from .training import (
+    build_optimizer,
+    create_grad_scaler,
+    evaluation_step,
+    move_batch_to_device,
+    set_deterministic_seed,
+    train_step,
+)
+
+
+METRIC_NAMES = [
+    "loss",
+    "pedal_token_accuracy",
+    "exact_note_accuracy",
+    "pedal1_accuracy",
+    "pedal2_accuracy",
+    "pedal3_accuracy",
+    "pedal4_accuracy",
+    "pedal_value_mae",
+    "valid_target_count",
+    "valid_note_count",
+]
+PINNED_PT_COMMIT = "747df2d12291e37f6638b39f1b71517e579ad48c"
+OVERLAP_NOTE = (
+    "Validation metrics count overlapping windows independently. "
+    "Overlap-aware test reconstruction is deferred to a later task."
+)
+
+
+class EpochMetricAccumulator:
+    """Aggregate batch metrics using valid target and note counts."""
+
+    def __init__(self) -> None:
+        self.valid_targets = 0
+        self.valid_notes = 0
+        self.loss_sum = 0.0
+        self.token_correct = 0.0
+        self.exact_notes = 0.0
+        self.slot_correct = [0.0] * 4
+        self.absolute_error_sum = 0.0
+
+    def update(self, metrics: dict[str, float | int]) -> None:
+        targets = int(metrics["valid_target_count"])
+        notes = int(metrics["valid_note_count"])
+        values = [float(metrics[name]) for name in METRIC_NAMES[:-2]]
+        if targets <= 0 or notes <= 0:
+            raise ValueError("batch metrics must contain valid targets and notes")
+        if targets != notes * 4:
+            raise ValueError("Stage 2 batches must have four valid targets per note")
+        if not all(math.isfinite(value) for value in values):
+            raise FloatingPointError("non-finite batch metric")
+        self.valid_targets += targets
+        self.valid_notes += notes
+        self.loss_sum += float(metrics["loss"]) * targets
+        self.token_correct += float(metrics["pedal_token_accuracy"]) * targets
+        self.exact_notes += float(metrics["exact_note_accuracy"]) * notes
+        for slot in range(4):
+            self.slot_correct[slot] += float(
+                metrics[f"pedal{slot + 1}_accuracy"]
+            ) * notes
+        self.absolute_error_sum += float(metrics["pedal_value_mae"]) * targets
+
+    def compute(self) -> dict[str, float | int]:
+        if not self.valid_targets or not self.valid_notes:
+            raise ValueError("cannot compute empty epoch metrics")
+        return {
+            "loss": self.loss_sum / self.valid_targets,
+            "pedal_token_accuracy": self.token_correct / self.valid_targets,
+            "exact_note_accuracy": self.exact_notes / self.valid_notes,
+            "pedal1_accuracy": self.slot_correct[0] / self.valid_notes,
+            "pedal2_accuracy": self.slot_correct[1] / self.valid_notes,
+            "pedal3_accuracy": self.slot_correct[2] / self.valid_notes,
+            "pedal4_accuracy": self.slot_correct[3] / self.valid_notes,
+            "pedal_value_mae": self.absolute_error_sum / self.valid_targets,
+            "valid_target_count": self.valid_targets,
+            "valid_note_count": self.valid_notes,
+        }
+
+
+@dataclass
+class EarlyStopping:
+    patience: int
+    min_delta: float
+    best_loss: float = math.inf
+    counter: int = 0
+    best_epoch: int = 0
+
+    def update(self, validation_loss: float, epoch: int) -> tuple[bool, bool]:
+        if not math.isfinite(validation_loss):
+            raise FloatingPointError("non-finite validation loss")
+        improved = validation_loss <= self.best_loss - self.min_delta
+        if improved:
+            self.best_loss = validation_loss
+            self.best_epoch = epoch
+            self.counter = 0
+        else:
+            self.counter += 1
+        return improved, self.counter >= self.patience
+
+
+class GracefulStop:
+    def __init__(self) -> None:
+        self.requested = False
+        self.signal_number: int | None = None
+
+    def handler(self, signal_number: int, frame: Any) -> None:
+        del frame
+        self.requested = True
+        self.signal_number = signal_number
+        print(
+            f"graceful stop requested by signal {signal_number}; "
+            "finishing the current batch",
+            flush=True,
+        )
+
+    def install(self) -> None:
+        signal.signal(signal.SIGINT, self.handler)
+        signal.signal(signal.SIGTERM, self.handler)
+
+
+def deterministic_train_order(length: int, seed: int, epoch: int) -> list[int]:
+    if length < 0 or epoch <= 0:
+        raise ValueError("length must be non-negative and epoch must be positive")
+    generator = torch.Generator().manual_seed(seed + epoch)
+    return torch.randperm(length, generator=generator).tolist()
+
+
+def atomic_torch_save(payload: dict[str, Any], destination: str | Path) -> None:
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.parent / (
+        f".{destination.name}.{os.getpid()}.{time.time_ns()}.tmp"
+    )
+    try:
+        with temporary.open("wb") as handle:
+            torch.save(payload, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def capture_rng_states() -> dict[str, Any]:
+    return {
+        "python_rng_state": __import__("random").getstate(),
+        "numpy_rng_state": np.random.get_state(),
+        "torch_cpu_rng_state": torch.get_rng_state(),
+        "torch_cuda_rng_state": (
+            torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []
+        ),
+    }
+
+
+def restore_rng_states(checkpoint: dict[str, Any]) -> None:
+    __import__("random").setstate(checkpoint["python_rng_state"])
+    np.random.set_state(checkpoint["numpy_rng_state"])
+    torch.set_rng_state(checkpoint["torch_cpu_rng_state"])
+    if torch.cuda.is_available() and checkpoint["torch_cuda_rng_state"]:
+        torch.cuda.set_rng_state_all(checkpoint["torch_cuda_rng_state"])
+
+
+def build_last_checkpoint(
+    model: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    scaler: torch.amp.GradScaler,
+    completed_epoch: int,
+    global_step: int,
+    early_stopping: EarlyStopping,
+    configuration: dict[str, Any],
+) -> dict[str, Any]:
+    payload = {
+        "model_state": model.state_dict(),
+        "optimizer_state": optimizer.state_dict(),
+        "grad_scaler_state": scaler.state_dict(),
+        "completed_epoch": completed_epoch,
+        "global_optimizer_step": global_step,
+        "best_validation_loss": early_stopping.best_loss,
+        "early_stopping_counter": early_stopping.counter,
+        "best_epoch": early_stopping.best_epoch,
+        "configuration": configuration,
+    }
+    payload.update(capture_rng_states())
+    return payload
+
+
+def build_best_checkpoint(
+    model: torch.nn.Module,
+    configuration: dict[str, Any],
+    best_epoch: int,
+    best_validation_loss: float,
+) -> dict[str, Any]:
+    return {
+        "model_state": model.state_dict(),
+        "configuration": configuration,
+        "best_epoch": best_epoch,
+        "best_validation_loss": best_validation_loss,
+    }
+
+
+def restore_training_state(
+    checkpoint: dict[str, Any],
+    model: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    scaler: torch.amp.GradScaler,
+    early_stopping: EarlyStopping,
+) -> tuple[int, int]:
+    model.load_state_dict(checkpoint["model_state"])
+    optimizer.load_state_dict(checkpoint["optimizer_state"])
+    scaler.load_state_dict(checkpoint["grad_scaler_state"])
+    early_stopping.best_loss = float(checkpoint["best_validation_loss"])
+    early_stopping.counter = int(checkpoint["early_stopping_counter"])
+    early_stopping.best_epoch = int(checkpoint.get("best_epoch", 0))
+    restore_rng_states(checkpoint)
+    return int(checkpoint["completed_epoch"]) + 1, int(
+        checkpoint["global_optimizer_step"]
+    )
+
+
+def get_gpu_identity() -> dict[str, str]:
+    result = subprocess.run(
+        [
+            "nvidia-smi",
+            "--query-gpu=uuid,name",
+            "--format=csv,noheader",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    rows = [row.strip() for row in result.stdout.splitlines() if row.strip()]
+    if len(rows) != 1:
+        raise RuntimeError(f"expected one container-visible GPU, found {len(rows)}")
+    uuid, name = [value.strip() for value in rows[0].split(",", 1)]
+    return {"uuid": uuid, "name": name}
+
+
+def make_loader(
+    dataset: torch.utils.data.Dataset,
+    batch_size: int,
+    pin_memory: bool,
+    order: list[int] | None = None,
+) -> DataLoader:
+    source = Subset(dataset, order) if order is not None else dataset
+    return DataLoader(
+        source,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=pin_memory,
+        collate_fn=stage2_pedal_collate_fn,
+    )
+
+
+def run_epoch(
+    model: torch.nn.Module,
+    loader: DataLoader,
+    device: torch.device,
+    training: bool,
+    amp_enabled: bool,
+    stop: GracefulStop,
+    optimizer: torch.optim.Optimizer | None = None,
+    scaler: torch.amp.GradScaler | None = None,
+    max_grad_norm: float = 1.0,
+    global_step: int = 0,
+    progress_interval: int = 100,
+) -> tuple[dict[str, float | int] | None, int, bool]:
+    accumulator = EpochMetricAccumulator()
+    for batch_index, cpu_batch in enumerate(loader, start=1):
+        batch = move_batch_to_device(cpu_batch, device)
+        if training:
+            if optimizer is None or scaler is None:
+                raise ValueError("training requires optimizer and scaler")
+            metrics = train_step(
+                model,
+                batch,
+                optimizer,
+                scaler=scaler,
+                amp_enabled=amp_enabled,
+                max_grad_norm=max_grad_norm,
+            )
+            global_step += 1
+        else:
+            metrics = evaluation_step(model, batch, amp_enabled=amp_enabled)
+        accumulator.update(metrics)
+        if batch_index % progress_interval == 0:
+            print(
+                f"{'train' if training else 'validation'} batch "
+                f"{batch_index}/{len(loader)} loss={metrics['loss']:.6f} "
+                f"global_step={global_step}",
+                flush=True,
+            )
+        if stop.requested:
+            return None, global_step, False
+    return accumulator.compute(), global_step, True
+
+
+def metric_row(
+    epoch: int,
+    global_step: int,
+    train_metrics: dict[str, float | int],
+    validation_metrics: dict[str, float | int],
+    epoch_seconds: float,
+    peak_memory_bytes: int,
+) -> dict[str, Any]:
+    row: dict[str, Any] = {
+        "epoch": epoch,
+        "global_optimizer_step": global_step,
+        "epoch_seconds": epoch_seconds,
+        "peak_gpu_memory_bytes": peak_memory_bytes,
+    }
+    for prefix, metrics in (
+        ("train", train_metrics),
+        ("validation", validation_metrics),
+    ):
+        for name in METRIC_NAMES:
+            row[f"{prefix}_{name}"] = metrics[name]
+    return row
+
+
+def prepare_output_directory(
+    output_dir: Path,
+    resume: Path | None,
+    allow_existing_log_dir: bool,
+) -> None:
+    if resume is not None:
+        if not output_dir.is_dir() or not resume.is_file():
+            raise FileNotFoundError("resume output directory or checkpoint is missing")
+        return
+    if output_dir.exists():
+        allowed = allow_existing_log_dir and output_dir.is_dir()
+        entries = {path.name for path in output_dir.iterdir()} if allowed else set()
+        if not allowed or not entries.issubset({"train.log"}):
+            raise FileExistsError(f"refusing to overwrite output directory: {output_dir}")
+    else:
+        output_dir.mkdir(parents=True)
+
+
+def write_configuration(path: Path, configuration: dict[str, Any]) -> None:
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(configuration, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def train(configuration: dict[str, Any]) -> int:
+    output_dir = Path(configuration["output_dir"]).resolve()
+    resume = (
+        Path(configuration["resume"]).resolve()
+        if configuration.get("resume")
+        else None
+    )
+    prepare_output_directory(
+        output_dir,
+        resume,
+        bool(configuration["allow_existing_log_dir"]),
+    )
+    configuration["output_dir"] = str(output_dir)
+    configuration["asap_root"] = str(Path(configuration["asap_root"]).resolve())
+    configuration["split_csv"] = str(Path(configuration["split_csv"]).resolve())
+    configuration["checkpoint_path"] = str(
+        Path(configuration["checkpoint_path"]).resolve()
+    )
+    configuration["pianist_transformer_commit"] = PINNED_PT_COMMIT
+    configuration["project_git_commit"] = os.environ.get(
+        "PROJECT_GIT_COMMIT", "unknown"
+    )
+    configuration["validation_overlap_note"] = OVERLAP_NOTE
+    configuration["checkpoint_boundary_note"] = (
+        "Checkpoints are exact at completed epoch boundaries. An interruption "
+        "within an epoch restarts that epoch."
+    )
+    if resume is None:
+        write_configuration(output_dir / "config.json", configuration)
+
+    set_deterministic_seed(int(configuration["seed"]))
+    stop = GracefulStop()
+    stop.install()
+    gpu = get_gpu_identity()
+    if gpu["uuid"] != configuration["expected_gpu_uuid"]:
+        raise RuntimeError(
+            f"GPU UUID mismatch: expected {configuration['expected_gpu_uuid']}, "
+            f"got {gpu['uuid']}"
+        )
+    print("configuration", json.dumps(configuration, sort_keys=True), flush=True)
+    print(f"GPU uuid={gpu['uuid']} model={gpu['name']}", flush=True)
+    print(OVERLAP_NOTE, flush=True)
+
+    preload_start = time.perf_counter()
+    train_dataset = Stage2PedalDataset(
+        configuration["asap_root"],
+        configuration["split_csv"],
+        "train",
+        window_notes=512,
+        stride_notes=256,
+        cache_mode="preload",
+    )
+    train_preload_seconds = time.perf_counter() - preload_start
+    preload_start = time.perf_counter()
+    validation_dataset = Stage2PedalDataset(
+        configuration["asap_root"],
+        configuration["split_csv"],
+        "validation",
+        window_notes=512,
+        stride_notes=256,
+        cache_mode="preload",
+    )
+    validation_preload_seconds = time.perf_counter() - preload_start
+    print(
+        f"preload train_seconds={train_preload_seconds:.3f} "
+        f"validation_seconds={validation_preload_seconds:.3f}",
+        flush=True,
+    )
+    print(
+        f"datasets train_performances={train_dataset.performance_count} "
+        f"train_windows={train_dataset.window_count} "
+        f"validation_performances={validation_dataset.performance_count} "
+        f"validation_windows={validation_dataset.window_count}",
+        flush=True,
+    )
+
+    device = torch.device("cuda:0")
+    model_load_start = time.perf_counter()
+    model = Stage2PedalEncoderModel.from_pretrained(
+        configuration["checkpoint_path"],
+        freeze_encoder=bool(configuration["freeze_encoder"]),
+        torch_dtype=torch.float32,
+        attn_implementation="eager",
+    ).to(device)
+    print(
+        f"model loaded seconds={time.perf_counter() - model_load_start:.3f}",
+        flush=True,
+    )
+    optimizer = build_optimizer(
+        model,
+        encoder_lr=float(configuration["encoder_lr"]),
+        head_lr=float(configuration["head_lr"]),
+        weight_decay=float(configuration["weight_decay"]),
+    )
+    scaler = create_grad_scaler(
+        enabled=bool(configuration["amp_enabled"]),
+        device="cuda",
+        amp_init_scale=float(configuration["amp_init_scale"]),
+    )
+    early_stopping = EarlyStopping(
+        patience=int(configuration["early_stopping_patience"]),
+        min_delta=float(configuration["early_stopping_min_delta"]),
+    )
+    start_epoch, global_step = 1, 0
+    if resume is not None:
+        checkpoint = torch.load(resume, map_location=device, weights_only=False)
+        start_epoch, global_step = restore_training_state(
+            checkpoint, model, optimizer, scaler, early_stopping
+        )
+        print(
+            f"resumed checkpoint={resume} start_epoch={start_epoch} "
+            f"global_step={global_step}",
+            flush=True,
+        )
+
+    validation_loader = make_loader(
+        validation_dataset,
+        int(configuration["batch_size"]),
+        bool(configuration["pin_memory"]),
+    )
+    metric_fields = [
+        "epoch",
+        "global_optimizer_step",
+        "epoch_seconds",
+        "peak_gpu_memory_bytes",
+    ] + [
+        f"{prefix}_{name}"
+        for prefix in ("train", "validation")
+        for name in METRIC_NAMES
+    ]
+    metrics_path = output_dir / "metrics.csv"
+    metrics_mode = "a" if resume is not None and metrics_path.exists() else "w"
+    metrics_handle = metrics_path.open(metrics_mode, newline="", encoding="utf-8")
+    writer = csv.DictWriter(metrics_handle, fieldnames=metric_fields)
+    if metrics_mode == "w":
+        writer.writeheader()
+        metrics_handle.flush()
+
+    run_start = time.perf_counter()
+    completed_epoch = start_epoch - 1
+    try:
+        for epoch in range(start_epoch, int(configuration["max_epochs"]) + 1):
+            torch.cuda.reset_peak_memory_stats(device)
+            epoch_start = time.perf_counter()
+            order = deterministic_train_order(
+                len(train_dataset), int(configuration["seed"]), epoch
+            )
+            train_loader = make_loader(
+                train_dataset,
+                int(configuration["batch_size"]),
+                bool(configuration["pin_memory"]),
+                order=order,
+            )
+            print(
+                f"epoch {epoch} start train_batches={len(train_loader)} "
+                f"validation_batches={len(validation_loader)}",
+                flush=True,
+            )
+            train_start = time.perf_counter()
+            train_metrics, global_step, train_complete = run_epoch(
+                model,
+                train_loader,
+                device,
+                training=True,
+                amp_enabled=bool(configuration["amp_enabled"]),
+                stop=stop,
+                optimizer=optimizer,
+                scaler=scaler,
+                max_grad_norm=float(configuration["max_grad_norm"]),
+                global_step=global_step,
+            )
+            if not train_complete:
+                atomic_torch_save(
+                    build_last_checkpoint(
+                        model,
+                        optimizer,
+                        scaler,
+                        completed_epoch,
+                        global_step,
+                        early_stopping,
+                        configuration,
+                    ),
+                    output_dir / "last.pt",
+                )
+                print("graceful stop checkpoint saved during train epoch", flush=True)
+                return 130
+            train_seconds = time.perf_counter() - train_start
+            validation_start = time.perf_counter()
+            validation_metrics, global_step, validation_complete = run_epoch(
+                model,
+                validation_loader,
+                device,
+                training=False,
+                amp_enabled=bool(configuration["amp_enabled"]),
+                stop=stop,
+                global_step=global_step,
+            )
+            if not validation_complete:
+                atomic_torch_save(
+                    build_last_checkpoint(
+                        model,
+                        optimizer,
+                        scaler,
+                        completed_epoch,
+                        global_step,
+                        early_stopping,
+                        configuration,
+                    ),
+                    output_dir / "last.pt",
+                )
+                print(
+                    "graceful stop checkpoint saved during validation epoch",
+                    flush=True,
+                )
+                return 130
+            validation_seconds = time.perf_counter() - validation_start
+
+            epoch_seconds = time.perf_counter() - epoch_start
+            completed_epoch = epoch
+            improved, should_stop = early_stopping.update(
+                float(validation_metrics["loss"]), epoch
+            )
+            peak_memory = torch.cuda.max_memory_allocated(device)
+            row = metric_row(
+                epoch,
+                global_step,
+                train_metrics,
+                validation_metrics,
+                epoch_seconds,
+                peak_memory,
+            )
+            writer.writerow(row)
+            metrics_handle.flush()
+            os.fsync(metrics_handle.fileno())
+            atomic_torch_save(
+                build_last_checkpoint(
+                    model,
+                    optimizer,
+                    scaler,
+                    completed_epoch,
+                    global_step,
+                    early_stopping,
+                    configuration,
+                ),
+                output_dir / "last.pt",
+            )
+            if improved:
+                atomic_torch_save(
+                    build_best_checkpoint(
+                        model,
+                        configuration,
+                        early_stopping.best_epoch,
+                        early_stopping.best_loss,
+                    ),
+                    output_dir / "best.pt",
+                )
+            elapsed = time.perf_counter() - run_start
+            average_epoch = elapsed / (epoch - start_epoch + 1)
+            remaining = average_epoch * (
+                int(configuration["max_epochs"]) - epoch
+            )
+            print(
+                f"epoch {epoch} complete train={train_metrics} "
+                f"validation={validation_metrics} "
+                f"train_seconds={train_seconds:.3f} "
+                f"validation_seconds={validation_seconds:.3f} "
+                f"seconds={epoch_seconds:.3f} "
+                f"elapsed={elapsed:.3f} estimated_remaining={remaining:.3f} "
+                f"peak_gpu_bytes={peak_memory} improved={improved} "
+                f"early_counter={early_stopping.counter}",
+                flush=True,
+            )
+            print("checkpoint last.pt saved", flush=True)
+            if improved:
+                print("checkpoint best.pt saved", flush=True)
+            if should_stop:
+                print(
+                    f"early stopping at epoch {epoch}; "
+                    f"best_epoch={early_stopping.best_epoch}",
+                    flush=True,
+                )
+                break
+            if stop.requested:
+                print("graceful stop completed at epoch boundary", flush=True)
+                return 130
+    finally:
+        metrics_handle.flush()
+        metrics_handle.close()
+    print(
+        f"training finished completed_epoch={completed_epoch} "
+        f"global_step={global_step} best_epoch={early_stopping.best_epoch} "
+        f"best_validation_loss={early_stopping.best_loss}",
+        flush=True,
+    )
+    return 0
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--asap-root",
+        default="/workspace/public/ASAP/asap-dataset-v1.1",
+    )
+    parser.add_argument(
+        "--split-csv",
+        default="/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv",
+    )
+    parser.add_argument(
+        "--checkpoint-path",
+        default="/workspace/project/checkpoints/pianist_transformer",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="/workspace/project/analysis/stage2_encoder_only_v0/train_v0",
+    )
+    parser.add_argument("--resume")
+    parser.add_argument("--batch-size", type=int, required=True)
+    parser.add_argument("--max-epochs", type=int, default=20)
+    parser.add_argument("--seed", type=int, default=20260710)
+    parser.add_argument("--early-stopping-patience", type=int, default=4)
+    parser.add_argument("--early-stopping-min-delta", type=float, default=1e-4)
+    parser.add_argument("--encoder-lr", type=float, default=1e-5)
+    parser.add_argument("--head-lr", type=float, default=1e-4)
+    parser.add_argument("--weight-decay", type=float, default=0.01)
+    parser.add_argument("--max-grad-norm", type=float, default=1.0)
+    parser.add_argument("--amp-init-scale", type=float, default=1024.0)
+    parser.add_argument(
+        "--amp-enabled", action=argparse.BooleanOptionalAction, default=True
+    )
+    parser.add_argument(
+        "--freeze-encoder", action=argparse.BooleanOptionalAction, default=False
+    )
+    parser.add_argument(
+        "--pin-memory", action=argparse.BooleanOptionalAction, default=True
+    )
+    parser.add_argument("--num-workers", type=int, default=0)
+    parser.add_argument("--allow-existing-log-dir", action="store_true")
+    parser.add_argument(
+        "--expected-gpu-uuid",
+        default="GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    configuration = vars(args)
+    if configuration["num_workers"] != 0:
+        raise ValueError("Experiment 1 v0 requires num_workers=0")
+    if configuration["batch_size"] <= 0 or configuration["max_epochs"] <= 0:
+        raise ValueError("batch_size and max_epochs must be positive")
+    return train(configuration)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

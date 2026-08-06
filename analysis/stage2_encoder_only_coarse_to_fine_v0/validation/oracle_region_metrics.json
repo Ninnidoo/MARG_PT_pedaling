@@ -1,0 +1,14 @@
+{
+  "intermediate_depth_mae": 19.53195955185162,
+  "predicted_mean": 69.38612365722656,
+  "predicted_median": 69.0,
+  "predicted_q05": 42.0,
+  "predicted_q25": 58.0,
+  "predicted_q75": 81.0,
+  "predicted_q95": 96.0,
+  "predicted_std": 16.362831115722656,
+  "tolerance_accuracy_10": 0.34525825928906245,
+  "tolerance_accuracy_20": 0.5981548486570742,
+  "tolerance_accuracy_5": 0.18846822614498984,
+  "unique_rounded_intermediate_values": 92
+}

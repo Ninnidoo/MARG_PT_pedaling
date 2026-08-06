@@ -1,0 +1,88 @@
+{
+  "all_five_classes_present": true,
+  "class_boundaries": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      63
+    ],
+    [
+      64,
+      95
+    ],
+    [
+      96,
+      126
+    ],
+    [
+      127,
+      127
+    ]
+  ],
+  "class_counts": [
+    2975658,
+    1758841,
+    2014383,
+    869828,
+    4335746
+  ],
+  "class_distribution": [
+    0.24891622002707608,
+    0.14712848497664804,
+    0.16850478181524947,
+    0.07276182203523104,
+    0.3626886911457953
+  ],
+  "class_names": [
+    "ZERO",
+    "LOW",
+    "MID",
+    "HIGH",
+    "FULL"
+  ],
+  "error_quantiles": {
+    "median": 0.0,
+    "q01": 0.0,
+    "q05": 0.0,
+    "q25": 0.0,
+    "q75": 8.0,
+    "q95": 23.0,
+    "q99": 30.0
+  },
+  "maximum_absolute_error": 31,
+  "median_performance_mae": 4.156661229409783,
+  "note_count": 2988614,
+  "on_region_mae": 3.3104990791496403,
+  "overall_mae": 4.535356188520833,
+  "per_slot_mae": [
+    4.563787093281367,
+    4.590765819875032,
+    4.505037452143368,
+    4.481834388783564
+  ],
+  "performance_count": 892,
+  "performance_macro_mae": 4.662331420607985,
+  "piece_count": 180,
+  "representative_policy": "canonical_interval_midpoint",
+  "representatives": [
+    0,
+    32,
+    80,
+    111,
+    127
+  ],
+  "source_split": "train",
+  "split_csv_sha256": "d1fe379eb123ff7abca93773296f735f40a215dcd6e6363b55756383708c965b",
+  "subthreshold_region_mae": 17.236381799150692,
+  "target_count": 11954456,
+  "test_split_accessed": false,
+  "tolerance_accuracy": {
+    "plus_minus_10": 0.8036634205688657,
+    "plus_minus_20": 0.9377912303161264,
+    "plus_minus_5": 0.7128965968840406
+  },
+  "zero_target_mae": 0.0
+}

@@ -1,0 +1,526 @@
+"""One-score official PT versus endpoint-aware five-class listening pipeline."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import random
+import subprocess
+import sys
+import tempfile
+import wave
+from pathlib import Path
+from typing import Any, Sequence
+
+import numpy as np
+import torch
+from miditoolkit import ControlChange, Instrument, MidiFile, Note, TempoChange
+
+from src.stage2_encoder_only.dataset import (
+    MASK_ID,
+    NON_PEDAL_FEATURES,
+    PEDAL_TOKEN_OFFSET,
+    TOKENS_PER_NOTE,
+    generate_window_starts,
+)
+from src.stage2_encoder_only.five_class import (
+    NUM_CLASSES,
+    PEDAL_SLOTS,
+    REPRESENTATIVES,
+    FiveClassPedalEncoderModel,
+    average_five_class_logits,
+    decode_five_classes,
+)
+# The official repository uses absolute ``src.*`` imports internally. Register
+# only its two import targets without changing either upstream source file.
+from third_party.PianistTransformer.src import model as _official_model_package
+from third_party.PianistTransformer.src import utils as _official_utils_package
+from third_party.PianistTransformer.src.model import pianoformer as _official_pianoformer
+from third_party.PianistTransformer.src.utils import midi as _official_midi
+
+sys.modules.setdefault("src.model", _official_model_package)
+sys.modules.setdefault("src.model.pianoformer", _official_pianoformer)
+sys.modules.setdefault("src.utils", _official_utils_package)
+sys.modules.setdefault("src.utils.midi", _official_midi)
+
+from third_party.PianistTransformer.src.model.generate import (  # noqa: E402
+    batch_performance_render,
+    map_midi,
+)
+from third_party.PianistTransformer.src.model.pianoformer import (  # noqa: E402
+    PianoT5Gemma,
+)
+from third_party.PianistTransformer.src.utils.midi import (  # noqa: E402
+    ids_to_midi,
+    midi_to_ids,
+)
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+PRIVATE_ASSET_ROOT = Path("/workspace/private/midi_rendering")
+DEFAULT_STAGE1_CHECKPOINT = REPOSITORY_ROOT / "checkpoints/pianist_transformer"
+DEFAULT_STAGE2_CHECKPOINT = (
+    REPOSITORY_ROOT / "analysis/stage2_encoder_only_5class_v0/best.pt"
+)
+DEFAULT_RENDERER = PRIVATE_ASSET_ROOT / "sfizz/install/bin/sfizz_render"
+DEFAULT_INSTRUMENT = (
+    PRIVATE_ASSET_ROOT
+    / "instruments/SalamanderGrandPianoV3/SalamanderGrandPianoV3.sfz"
+)
+WINDOW_NOTES = 512
+STRIDE_NOTES = 256
+SAMPLE_RATE = 48_000
+CHANNELS = 2
+
+
+def seed_everything(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+
+def select_first_valid_score(score_dir: Path) -> Path:
+    candidates = sorted(
+        (path for path in score_dir.iterdir() if path.suffix.lower() in {".mid", ".midi"}),
+        key=lambda path: path.name,
+    )
+    for path in candidates:
+        try:
+            midi = MidiFile(str(path))
+        except Exception:
+            continue
+        if any(instrument.notes for instrument in midi.instruments if not instrument.is_drum):
+            return path.resolve()
+    raise FileNotFoundError(f"no valid score MIDI in {score_dir}")
+
+
+def _load_stage2_model(
+    checkpoint_path: Path, device: torch.device
+) -> tuple[FiveClassPedalEncoderModel, dict[str, Any]]:
+    checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
+    if "model_state" not in checkpoint or "configuration" not in checkpoint:
+        raise KeyError("five-class checkpoint lacks model_state/configuration")
+    configuration = checkpoint["configuration"]
+    if int(configuration["window_notes"]) != WINDOW_NOTES:
+        raise ValueError("Stage 2 checkpoint window size is not 512")
+    if int(configuration["stride_notes"]) != STRIDE_NOTES:
+        raise ValueError("Stage 2 checkpoint stride is not 256")
+    if list(configuration["representatives"]) != REPRESENTATIVES.tolist():
+        raise ValueError("Stage 2 checkpoint representatives differ from canonical values")
+    model = FiveClassPedalEncoderModel.from_pretrained(
+        configuration["checkpoint_path"],
+        freeze_encoder=False,
+        torch_dtype=torch.float32,
+        attn_implementation="eager",
+    )
+    incompatible = model.load_state_dict(checkpoint["model_state"], strict=True)
+    if incompatible.missing_keys or incompatible.unexpected_keys:
+        raise RuntimeError("five-class state-dict mismatch")
+    if len(model.classification_heads) != PEDAL_SLOTS or any(
+        head.in_features != 768 or head.out_features != NUM_CLASSES
+        for head in model.classification_heads
+    ):
+        raise RuntimeError("five-class checkpoint architecture mismatch")
+    model.to(device).eval()
+    return model, {
+        "best_epoch": int(checkpoint["best_epoch"]),
+        "best_validation_loss": float(checkpoint["best_validation_loss"]),
+        "configuration": configuration,
+    }
+
+
+def infer_five_class_pedals(
+    model: FiveClassPedalEncoderModel,
+    generated_ids: Sequence[int],
+    device: torch.device,
+) -> tuple[list[int], dict[str, Any]]:
+    flat = np.asarray(generated_ids, dtype=np.int64)
+    if flat.size == 0 or flat.size % TOKENS_PER_NOTE:
+        raise ValueError("Stage 1 token sequence must contain complete eight-token notes")
+    tokens = flat.reshape(-1, TOKENS_PER_NOTE)
+    num_notes = len(tokens)
+    starts = generate_window_starts(num_notes, WINDOW_NOTES, STRIDE_NOTES)
+    windows: list[tuple[int, np.ndarray]] = []
+
+    with torch.inference_mode():
+        for start in starts:
+            end = min(start + WINDOW_NOTES, num_notes)
+            masked = tokens[start:end].copy()
+            masked[:, NON_PEDAL_FEATURES:] = MASK_ID
+            input_ids = torch.from_numpy(masked.reshape(1, -1)).long().to(device)
+            attention = torch.ones_like(input_ids)
+            note_mask = torch.ones((1, end - start), dtype=torch.bool, device=device)
+            with torch.amp.autocast(
+                device_type=device.type,
+                dtype=torch.float16 if device.type == "cuda" else torch.bfloat16,
+                enabled=device.type == "cuda",
+            ):
+                output = model(
+                    input_ids=input_ids,
+                    token_attention_mask=attention,
+                    note_mask=note_mask,
+                )
+            if not bool(torch.isfinite(output.logits).all()):
+                raise FloatingPointError("Stage 2 produced non-finite logits")
+            windows.append((start, output.logits[0].float().cpu().numpy()))
+
+    averaged, contribution_count = average_five_class_logits(num_notes, windows)
+    predicted_classes = averaged.argmax(axis=-1).astype(np.int64)
+    decoded_values = decode_five_classes(predicted_classes)
+    allowed = set(REPRESENTATIVES.tolist())
+    if not set(np.unique(decoded_values).tolist()).issubset(allowed):
+        raise RuntimeError("decoded Stage 2 pedal value is not a canonical representative")
+    stage2_tokens = tokens.copy()
+    stage2_tokens[:, NON_PEDAL_FEATURES:] = decoded_values + PEDAL_TOKEN_OFFSET
+    if not np.array_equal(
+        stage2_tokens[:, :NON_PEDAL_FEATURES], tokens[:, :NON_PEDAL_FEATURES]
+    ):
+        raise AssertionError("Stage 2 modified a non-pedal token")
+    return stage2_tokens.reshape(-1).tolist(), {
+        "notes": num_notes,
+        "windows": len(starts),
+        "window_notes": WINDOW_NOTES,
+        "stride_notes": STRIDE_NOTES,
+        "minimum_overlap_contributions": int(contribution_count.min()),
+        "maximum_overlap_contributions": int(contribution_count.max()),
+        "decoded_representatives": sorted(np.unique(decoded_values).tolist()),
+    }
+
+
+def _note_signature(midi: MidiFile) -> list[tuple[int, int, int, int, int]]:
+    signature = []
+    for instrument_index, instrument in enumerate(midi.instruments):
+        for note in instrument.notes:
+            signature.append(
+                (instrument_index, note.pitch, note.start, note.end, note.velocity)
+            )
+    return sorted(signature)
+
+
+def _metadata_signature(midi: MidiFile) -> dict[str, Any]:
+    return {
+        "ticks_per_beat": midi.ticks_per_beat,
+        "instruments": [
+            (instrument.program, instrument.is_drum, instrument.name)
+            for instrument in midi.instruments
+        ],
+        "tempos": [(item.time, item.tempo) for item in midi.tempo_changes],
+        "time_signatures": [
+            (item.time, item.numerator, item.denominator)
+            for item in midi.time_signature_changes
+        ],
+        "key_signatures": [
+            (item.time, item.key_name) for item in midi.key_signature_changes
+        ],
+        "markers": [(item.time, item.text) for item in midi.markers],
+        "lyrics": [(item.time, item.text) for item in midi.lyrics],
+        "pitch_bends": [
+            (index, item.time, item.pitch)
+            for index, instrument in enumerate(midi.instruments)
+            for item in instrument.pitch_bends
+        ],
+        "non_cc64": [
+            (index, item.time, item.number, item.value)
+            for index, instrument in enumerate(midi.instruments)
+            for item in instrument.control_changes
+            if item.number != 64
+        ],
+    }
+
+
+def _cc64_signature(midi: MidiFile) -> list[tuple[int, int, int]]:
+    return [
+        (index, item.time, item.value)
+        for index, instrument in enumerate(midi.instruments)
+        for item in instrument.control_changes
+        if item.number == 64
+    ]
+
+
+def verify_midi_control(original_path: Path, stage2_path: Path) -> dict[str, Any]:
+    original = MidiFile(str(original_path))
+    stage2 = MidiFile(str(stage2_path))
+    notes_equal = _note_signature(original) == _note_signature(stage2)
+    metadata_equal = _metadata_signature(original) == _metadata_signature(stage2)
+    original_cc64 = _cc64_signature(original)
+    stage2_cc64 = _cc64_signature(stage2)
+    sustain_differs = original_cc64 != stage2_cc64
+    if not notes_equal or not metadata_equal:
+        raise RuntimeError(
+            "controlled MIDI comparison failed: "
+            f"notes_equal={notes_equal}, metadata_equal={metadata_equal}, "
+            f"sustain_differs={sustain_differs}"
+        )
+    return {
+        "passed": True,
+        "note_count": len(_note_signature(original)),
+        "notes_pitch_onset_velocity_duration_equal": notes_equal,
+        "tempo_and_major_metadata_equal": metadata_equal,
+        "only_sustain_cc64_may_differ": True,
+        "sustain_cc64_differs": sustain_differs,
+        "original_cc64_events": len(original_cc64),
+        "stage2_cc64_events": len(stage2_cc64),
+    }
+
+
+def _render_command(renderer: Path, instrument: Path, midi: Path, wav: Path) -> list[str]:
+    return [
+        str(renderer),
+        "--sfz", str(instrument),
+        "--midi", str(midi),
+        "--wav", str(wav),
+        "--samplerate", str(SAMPLE_RATE),
+        "--use-eot",
+    ]
+
+
+def render_midi(renderer: Path, instrument: Path, midi: Path, wav: Path) -> list[str]:
+    command = _render_command(renderer, instrument, midi, wav)
+    result = subprocess.run(command, text=True, capture_output=True)
+    if result.returncode:
+        raise RuntimeError(
+            f"render command failed ({result.returncode}): {command!r}\n"
+            f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+        )
+    if not wav.is_file() or wav.stat().st_size <= 44:
+        raise RuntimeError(f"renderer did not create a non-empty WAV: {wav}")
+    return command
+
+
+def _read_wav(path: Path) -> tuple[dict[str, Any], np.ndarray]:
+    with wave.open(str(path), "rb") as handle:
+        metadata = {
+            "sample_rate": handle.getframerate(),
+            "channels": handle.getnchannels(),
+            "sample_width_bytes": handle.getsampwidth(),
+            "frames": handle.getnframes(),
+            "duration_seconds": handle.getnframes() / handle.getframerate(),
+        }
+        raw = handle.readframes(handle.getnframes())
+    if metadata["sample_width_bytes"] not in {2, 4}:
+        raise ValueError("smoke check requires 16-bit or 32-bit integer PCM")
+    dtype = np.dtype("<i2" if metadata["sample_width_bytes"] == 2 else "<i4")
+    audio = np.frombuffer(raw, dtype=dtype).reshape(-1, metadata["channels"])
+    return metadata, audio.astype(np.float64)
+
+
+def run_cc64_smoke_check(renderer: Path, instrument: Path) -> dict[str, Any]:
+    PRIVATE_ASSET_ROOT.joinpath("cache").mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix="cc64-smoke-", dir=PRIVATE_ASSET_ROOT / "cache"
+    ) as temporary:
+        root = Path(temporary)
+        midi_paths = [root / "without_sustain.mid", root / "with_sustain.mid"]
+        wav_paths = [root / "without_sustain.wav", root / "with_sustain.wav"]
+        for index, midi_path in enumerate(midi_paths):
+            midi = MidiFile(ticks_per_beat=480)
+            instrument_track = Instrument(program=0, is_drum=False, name="Piano")
+            instrument_track.notes = [
+                Note(velocity=100, pitch=60, start=0, end=480),
+                Note(velocity=1, pitch=108, start=1920, end=2160),
+            ]
+            if index:
+                instrument_track.control_changes = [
+                    ControlChange(number=64, value=127, time=0),
+                    ControlChange(number=64, value=0, time=1440),
+                ]
+            midi.instruments.append(instrument_track)
+            midi.tempo_changes.append(TempoChange(120.0, 0))
+            midi.dump(str(midi_path))
+            render_midi(renderer, instrument, midi_path, wav_paths[index])
+        without_meta, without = _read_wav(wav_paths[0])
+        with_meta, with_pedal = _read_wav(wav_paths[1])
+        if without_meta != with_meta:
+            raise RuntimeError("CC64 smoke WAV formats/durations differ")
+        start = int(0.65 * SAMPLE_RATE)
+        end = min(int(1.45 * SAMPLE_RATE), len(without), len(with_pedal))
+        difference = with_pedal[start:end] - without[start:end]
+        scale = float(np.iinfo(np.int16).max if without_meta["sample_width_bytes"] == 2 else np.iinfo(np.int32).max)
+        difference_rms = float(np.sqrt(np.mean(np.square(difference))) / scale)
+        if not np.isfinite(difference_rms) or difference_rms <= 1e-5:
+            raise RuntimeError(
+                f"CC64 smoke check found no sustain-tail difference (RMS={difference_rms})"
+            )
+        return {
+            "passed": True,
+            "tail_difference_rms": difference_rms,
+            "analysis_interval_seconds": [0.65, end / SAMPLE_RATE],
+            "temporary_outputs_removed": True,
+        }
+
+
+def validate_wav_pair(original: Path, stage2: Path) -> dict[str, Any]:
+    original_meta, _ = _read_wav(original)
+    stage2_meta, _ = _read_wav(stage2)
+    if original_meta["sample_rate"] != SAMPLE_RATE or stage2_meta["sample_rate"] != SAMPLE_RATE:
+        raise RuntimeError("WAV sample rate is not 48000 Hz")
+    if original_meta["channels"] != CHANNELS or stage2_meta["channels"] != CHANNELS:
+        raise RuntimeError("WAV output is not stereo")
+    durations = [original_meta["duration_seconds"], stage2_meta["duration_seconds"]]
+    if min(durations) <= 0.5 or abs(durations[0] - durations[1]) > max(5.0, 0.25 * max(durations)):
+        raise RuntimeError(f"WAV durations are unreasonable: {durations}")
+    return {"passed": True, "original": original_meta, "stage2_5class": stage2_meta}
+
+
+def _ensure_private_asset(path: Path, kind: str) -> Path:
+    resolved = path.resolve(strict=True)
+    try:
+        resolved.relative_to(PRIVATE_ASSET_ROOT)
+    except ValueError as exc:
+        raise ValueError(f"{kind} must be under {PRIVATE_ASSET_ROOT}: {resolved}") from exc
+    return resolved
+
+
+def _set_repository_ownership(paths: Sequence[Path]) -> None:
+    owner = REPOSITORY_ROOT.stat()
+    for path in paths:
+        os.chown(path, owner.st_uid, owner.st_gid)
+        os.chmod(path, 0o664)
+
+
+def run(args: argparse.Namespace) -> dict[str, Any]:
+    score_path = Path(args.score).resolve(strict=True)
+    stage1_checkpoint = Path(args.stage1_checkpoint).resolve(strict=True)
+    stage2_checkpoint = Path(args.stage2_checkpoint).resolve(strict=True)
+    renderer = _ensure_private_asset(Path(args.renderer), "renderer")
+    instrument = _ensure_private_asset(Path(args.instrument), "instrument")
+    if not os.access(renderer, os.X_OK):
+        raise PermissionError(f"renderer is not executable: {renderer}")
+
+    output_midi_dir = Path(args.output_midi_dir).resolve()
+    output_audio_dir = Path(args.output_audio_dir).resolve()
+    output_midi_dir.mkdir(parents=True, exist_ok=True)
+    output_audio_dir.mkdir(parents=True, exist_ok=True)
+    stem = score_path.stem
+    original_midi_path = output_midi_dir / f"{stem}_original_pt.mid"
+    stage2_midi_path = output_midi_dir / f"{stem}_stage2_5class.mid"
+    original_wav_path = output_audio_dir / f"{stem}_original_pt.wav"
+    stage2_wav_path = output_audio_dir / f"{stem}_stage2_5class.wav"
+    result_paths = [
+        original_midi_path, stage2_midi_path, original_wav_path, stage2_wav_path
+    ]
+    if any(path.exists() for path in result_paths):
+        raise FileExistsError("refusing to overwrite an existing listening output")
+
+    seed_everything(args.seed)
+    stage1_model = PianoT5Gemma.from_pretrained(
+        str(stage1_checkpoint), torch_dtype=torch.bfloat16
+    )
+    stage1_model.eval()
+    generation_config = stage1_model.generation_config
+    stage1_config = stage1_model.config
+    score_midi = MidiFile(str(score_path))
+    score_ids = midi_to_ids(stage1_model.config, score_midi)
+    performances, generated_sequences = batch_performance_render(
+        stage1_model,
+        [score_midi],
+        temperature=1.0,
+        top_p=0.95,
+        device="cpu",
+    )
+    if len(performances) != 1 or len(generated_sequences) != 1:
+        raise RuntimeError("official Stage 1 did not return exactly one performance")
+    generated_ids = generated_sequences[0]
+    # map_midi mutates borrowed metadata objects in its score argument, so give
+    # each controlled branch an independently reloaded copy of the same score.
+    original_mapped = map_midi(MidiFile(str(score_path)), performances[0])
+    original_mapped.dump(str(original_midi_path))
+    generated_hash = hashlib.sha256(
+        np.asarray(generated_ids, dtype="<i8").tobytes()
+    ).hexdigest()
+    del stage1_model
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    stage2_model, stage2_metadata = _load_stage2_model(stage2_checkpoint, device)
+    stage2_ids, stage2_inference = infer_five_class_pedals(
+        stage2_model, generated_ids, device
+    )
+    del stage2_model
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+    stage2_performance = ids_to_midi(
+        stage1_config,
+        stage2_ids,
+        ref=score_ids,
+    )
+    stage2_mapped = map_midi(MidiFile(str(score_path)), stage2_performance)
+    stage2_mapped.dump(str(stage2_midi_path))
+    midi_verification = verify_midi_control(original_midi_path, stage2_midi_path)
+
+    smoke = run_cc64_smoke_check(renderer, instrument)
+    render_commands = [
+        render_midi(renderer, instrument, original_midi_path, original_wav_path),
+        render_midi(renderer, instrument, stage2_midi_path, stage2_wav_path),
+    ]
+    wav_verification = validate_wav_pair(original_wav_path, stage2_wav_path)
+
+    run_info_path = REPOSITORY_ROOT / "outputs/listening_comparison_5class_v0_run_info.json"
+    run_info = {
+        "selected_score": str(score_path),
+        "seed": int(args.seed),
+        "stage1_checkpoint": str(stage1_checkpoint),
+        "stage2_checkpoint": str(stage2_checkpoint),
+        "stage1_decoding": {
+            "method": "official batch_performance_render; multinomial sampling",
+            "do_sample": True,
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": int(generation_config.top_k),
+            "num_beams": int(generation_config.num_beams),
+            "repetition_penalty": float(generation_config.repetition_penalty),
+            "separate_generator": False,
+            "stage1_invocations": 1,
+        },
+        "stage1_generated_token_sequence_sha256_int64_le": generated_hash,
+        "stage1_generated_tokens": len(generated_ids),
+        "stage2": {**stage2_metadata, "inference": stage2_inference},
+        "sfizz_render": str(renderer),
+        "salamander_sfz": str(instrument),
+        "audio": {
+            "sample_rate": SAMPLE_RATE,
+            "channels": CHANNELS,
+            "gain": "sfizz_render default; identical for both files",
+            "render_commands": render_commands,
+            "verification": wav_verification,
+        },
+        "cc64_smoke_check": smoke,
+        "non_pedal_midi_verification": midi_verification,
+        "outputs": {
+            "original_pt_midi": str(original_midi_path),
+            "stage2_5class_midi": str(stage2_midi_path),
+            "original_pt_wav": str(original_wav_path),
+            "stage2_5class_wav": str(stage2_wav_path),
+        },
+    }
+    run_info_path.write_text(
+        json.dumps(run_info, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    _set_repository_ownership([*result_paths, run_info_path])
+    return {**run_info, "run_info": str(run_info_path)}
+
+
+def build_argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--score", required=True, help="one score MIDI path")
+    parser.add_argument("--output-midi-dir", required=True)
+    parser.add_argument("--output-audio-dir", required=True)
+    parser.add_argument("--stage1-checkpoint", default=str(DEFAULT_STAGE1_CHECKPOINT))
+    parser.add_argument("--stage2-checkpoint", default=str(DEFAULT_STAGE2_CHECKPOINT))
+    parser.add_argument("--renderer", default=str(DEFAULT_RENDERER))
+    parser.add_argument("--instrument", default=str(DEFAULT_INSTRUMENT))
+    parser.add_argument("--seed", type=int, default=42)
+    return parser
+
+
+def main() -> None:
+    args = build_argument_parser().parse_args()
+    print(json.dumps(run(args), indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,70 @@
+{
+  "run_id": "20260804T061750Z-ab88a7fee696",
+  "pid": 688,
+  "started_at_utc": "2026-08-04T06:17:50.146947+00:00",
+  "hostname": "d3affcb5b8ad",
+  "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1",
+  "split_csv": "/workspace/project/analysis/stage2_encoder_only_v0/asap_split.csv",
+  "split_csv_sha256": "d1fe379eb123ff7abca93773296f735f40a215dcd6e6363b55756383708c965b",
+  "split": "train",
+  "data_access_policy": "Only train rows are loaded; validation/test MIDI are never opened.",
+  "six_class_baseline_directory_read_only": "/workspace/project/analysis/stage2_pedal_6class_audit_v0",
+  "tokenizer": "Pinned Pianist Transformer midi_to_ids via Stage2PedalDataset(cache_mode='preload')",
+  "class_definition": [
+    {
+      "class_id": 0,
+      "name": "ZERO",
+      "minimum": 0,
+      "maximum": 0
+    },
+    {
+      "class_id": 1,
+      "name": "LOW",
+      "minimum": 1,
+      "maximum": 63
+    },
+    {
+      "class_id": 2,
+      "name": "MID",
+      "minimum": 64,
+      "maximum": 95
+    },
+    {
+      "class_id": 3,
+      "name": "HIGH",
+      "minimum": 96,
+      "maximum": 126
+    },
+    {
+      "class_id": 4,
+      "name": "FULL",
+      "minimum": 127,
+      "maximum": 127
+    }
+  ],
+  "representative_policy": "ZERO=0; FULL=127; interior classes use global train Pedal1-4 median shared by all slots.",
+  "adoption_criteria": {
+    "overall_oracle_mae_max": 4.0,
+    "intermediate_only_oracle_mae_max": 10.0,
+    "plus_minus_10_accuracy_min": 0.85,
+    "binary_transition_preservation_required": 1.0,
+    "short_repedal_preservation_required": 1.0,
+    "all_five_classes_present_required": true,
+    "new_transitions_required": 0
+  },
+  "model_training": false,
+  "git": {
+    "available": false,
+    "commit": null,
+    "error": "FileNotFoundError: [Errno 2] No such file or directory: 'git'"
+  },
+  "train_performance_count": 892,
+  "train_piece_count": 180,
+  "normalized_note_count": 2988614,
+  "tokenized_pedal_target_count": 11954456,
+  "cached_performance_count": 892,
+  "cached_nbytes": 47817824,
+  "all_adoption_criteria_passed": false,
+  "recommendation": "retain_6class",
+  "completed_at_utc": "2026-08-04T06:18:47.001127+00:00"
+}

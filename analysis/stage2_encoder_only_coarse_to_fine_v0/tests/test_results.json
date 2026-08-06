@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "total_tests": 93,
+  "modules": {
+    "dataset": 12,
+    "model": 8,
+    "training": 6,
+    "train": 10,
+    "evaluate": 10,
+    "posterior": 12,
+    "calibration": 13,
+    "ordinal": 12,
+    "coarse_to_fine": 10
+  }
+}

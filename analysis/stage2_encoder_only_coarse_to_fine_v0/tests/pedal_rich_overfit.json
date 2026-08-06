@@ -1,0 +1,25 @@
+{
+  "active_encoder_parameter": "embeddings.word_embeddings.weight",
+  "encoder_and_all_head_parameters_changed": true,
+  "final": {
+    "end_to_end_mae": 0.0228271484375,
+    "intermediate_oracle_region_mae": 0.02560241147875786,
+    "region_accuracy": 1.0
+  },
+  "finite_nonzero_gradients_all_groups": true,
+  "initial": {
+    "end_to_end_mae": 49.2005615234375,
+    "intermediate_oracle_region_mae": 50.37431716918945,
+    "region_accuracy": 0.5164794921875
+  },
+  "oom": false,
+  "passed": true,
+  "performance_path": "Schubert/Piano_Sonatas/664-3/Lin07.mid",
+  "steps": 250,
+  "window_starts": [
+    0,
+    256,
+    512,
+    768
+  ]
+}
