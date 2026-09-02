@@ -77,6 +77,8 @@ LOSS_CONFIGURATION = {
     "label_smoothing": 0.0,
 }
 
+WEIGHTED_LOSS_NAME = "class_weighted_cross_entropy_inverse_sqrt_train_global"
+
 Callback = Callable[[dict[str, Any]], None]
 
 
@@ -196,6 +198,69 @@ def _raw_targets(tokens: np.ndarray) -> np.ndarray:
         raise ValueError("tokenized pedal target outside [0,127]")
     return targets
 
+
+
+def inverse_sqrt_class_weights(class_counts: Sequence[int] | np.ndarray) -> np.ndarray:
+    """Return w_c ∝ 1/sqrt(p_c), normalized so Σ p_c w_c = 1."""
+
+    counts = np.asarray(class_counts, dtype=np.float64)
+    if counts.shape != (NUM_CLASSES,) or not np.isfinite(counts).all() or np.any(counts <= 0):
+        raise ValueError("class counts must be five finite, strictly positive values")
+    probabilities = counts / counts.sum()
+    raw = 1.0 / np.sqrt(probabilities)
+    weights = raw / np.dot(probabilities, raw)
+    if not np.isfinite(weights).all() or np.any(weights <= 0) or not np.isclose(np.dot(probabilities, weights), 1.0):
+        raise FloatingPointError("inverse-sqrt probability-weight normalization failed")
+    return weights
+
+
+def train_global_class_weight_payload(dataset: Stage2PedalDataset) -> dict[str, Any]:
+    """Count Pedal1--4 only from preloaded ASAP train performances."""
+
+    if any(row.get("split") != "train" for row in dataset.performances):
+        raise RuntimeError("class-weight calculation received a non-train performance")
+    counts = np.zeros(NUM_CLASSES, dtype=np.int64)
+    note_count = 0
+    for row in dataset.performances:
+        raw = _raw_targets(dataset._token_cache[row["performance_path"]])
+        classes = np.asarray(classify_pedal_values(raw), dtype=np.int64)
+        counts += np.bincount(classes.reshape(-1), minlength=NUM_CLASSES)
+        note_count += len(raw)
+    target_count = int(counts.sum())
+    if target_count != note_count * PEDAL_SLOTS:
+        raise RuntimeError("class-weight target count does not cover Pedal1--4 exactly once")
+    weights = inverse_sqrt_class_weights(counts)
+    return {
+        "source_split": "train",
+        "test_split_accessed": False,
+        "aggregation": "Pedal1-Pedal4 global",
+        "formula": "p_c = train Pedal1-Pedal4 class_count / target_count; w_c proportional to 1 / sqrt(p_c); normalized so sum_c p_c w_c = 1",
+        "class_names": list(CLASS_NAMES),
+        "class_counts": counts.tolist(),
+        "frequencies": (counts / target_count).tolist(),
+        "probabilities": (counts / target_count).tolist(),
+        "target_count": target_count,
+        "weights": weights.tolist(),
+        "normalization_sum_p_times_w": float(np.dot(counts / target_count, weights)),
+    }
+
+
+def _apply_train_global_weights(
+    configuration: dict[str, Any], dataset: Stage2PedalDataset, output_dir: Path
+) -> dict[str, Any] | None:
+    loss = configuration.get("loss_configuration", {})
+    if loss.get("name") != WEIGHTED_LOSS_NAME:
+        return None
+    payload = train_global_class_weight_payload(dataset)
+    existing = loss.get("class_weights")
+    if existing is not None and not np.allclose(existing, payload["weights"], rtol=0.0, atol=1e-15):
+        raise RuntimeError("saved train-global class weights differ from recomputation")
+    loss = dict(loss)
+    loss.update(class_weighting="global_train_pedal1_4_inverse_sqrt", class_weights=payload["weights"])
+    configuration["loss_configuration"] = loss
+    configuration["class_weight_artifact"] = str(output_dir / "class_weights.json")
+    _atomic_json(output_dir / "class_weights.json", payload)
+    return payload
 
 def _weighted_quantile_from_histogram(histogram: np.ndarray, quantile: float) -> float:
     total = int(histogram.sum())
@@ -374,7 +439,7 @@ def _overfit_measure(
     valid = targets != -100
     predictions = logits.argmax(dim=-1)
     decoded = decode_five_classes(predictions)
-    loss = FiveClassPedalEncoderModel.compute_loss(logits, targets)
+    loss = FiveClassPedalEncoderModel.compute_loss(logits, targets, model.class_weights)
     correct = (predictions == targets) & valid
     valid_notes = valid.any(dim=-1)
     exact = ((predictions == targets) | ~valid).all(dim=-1)
@@ -429,6 +494,8 @@ def pedal_rich_overfit(output_dir: str | Path) -> dict[str, Any]:
     )
     if any(row.get("split") != "train" for row in dataset.performances):
         raise RuntimeError("non-train row reached the overfit gate")
+    class_weight_payload = _apply_train_global_weights(configuration, dataset, output_root)
+    _atomic_json(output_root / "config.json", configuration)
     try:
         row = next(
             item
@@ -463,6 +530,8 @@ def pedal_rich_overfit(output_dir: str | Path) -> dict[str, Any]:
         torch_dtype=torch.float32,
         attn_implementation="eager",
     ).to(device)
+    if class_weight_payload is not None:
+        model.set_class_weights(class_weight_payload["weights"])
     if model.hidden_size != 768:
         raise RuntimeError(f"expected hidden size 768, got {model.hidden_size}")
     optimizer = build_optimizer(
@@ -594,6 +663,7 @@ def pedal_rich_overfit(output_dir: str | Path) -> dict[str, Any]:
         "peak_gpu_memory_bytes": int(torch.cuda.max_memory_allocated(device)),
         "oom": oom,
         "gpu": gpu,
+        "class_weights": class_weight_payload["weights"] if class_weight_payload else None,
         "overfit_optimizer": {
             "name": "AdamW", "encoder_lr": 1e-4, "head_lr": 1e-3,
             "weight_decay": 0.0, "max_grad_norm": 1.0,
@@ -719,7 +789,7 @@ def _prepare_training_directory(output_dir: Path, resume: Path | None) -> None:
         return
     output_dir.mkdir(parents=True, exist_ok=True)
     allowed = {
-        ".run.lock", "run_status.json", "train.log", "tests", "config.json"
+        ".run.lock", "run_status.json", "train.log", "tests", "config.json", "class_weights.json"
     }
     unexpected = {path.name for path in output_dir.iterdir()} - allowed
     if unexpected:
@@ -748,6 +818,9 @@ def _merge_configuration(
     else:
         merged = dict(saved)
         merged.update(supplied)
+    requested_loss = merged.get("loss_configuration", LOSS_CONFIGURATION)
+    if requested_loss.get("name") not in {LOSS_CONFIGURATION["name"], WEIGHTED_LOSS_NAME}:
+        raise ValueError("unsupported five-class loss configuration")
     defaults = default_configuration(output_dir)
     for key, value in defaults.items():
         merged.setdefault(key, value)
@@ -760,7 +833,7 @@ def _merge_configuration(
         class_boundaries=[list(bounds) for bounds in CLASS_BOUNDS],
         representatives=REPRESENTATIVES.tolist(),
         representative_policy=REPRESENTATIVE_POLICY,
-        loss_configuration=dict(LOSS_CONFIGURATION),
+        loss_configuration=dict(requested_loss),
         scheduler=None,
         pianist_transformer_commit=PINNED_PT_COMMIT,
         pipeline_splits=["train", "validation"],
@@ -918,6 +991,7 @@ def train(
         train_preload_seconds=train_preload_seconds,
         validation_preload_seconds=validation_preload_seconds,
     )
+    class_weight_payload = _apply_train_global_weights(configuration, train_dataset, output_dir)
     _atomic_json(config_path, configuration)
     _notify(
         progress_callback,
@@ -942,6 +1016,8 @@ def train(
         torch_dtype=torch.float32,
         attn_implementation="eager",
     )
+    if class_weight_payload is not None:
+        model.set_class_weights(class_weight_payload["weights"])
     if model.hidden_size != 768 or len(model.classification_heads) != PEDAL_SLOTS:
         raise RuntimeError("five-class model architecture differs from registration")
     encoder_hash = parameter_hash(model.encoder)

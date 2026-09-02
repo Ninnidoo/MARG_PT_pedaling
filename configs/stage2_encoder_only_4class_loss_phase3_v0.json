@@ -1,0 +1,25 @@
+{
+  "experiment_id": "stage2_encoder_only_4class_loss_phase3_v0",
+  "canonical_config": "/workspace/project/configs/stage2_4class_architecture_v0.json",
+  "canonical_baseline_checkpoint": "/workspace/project/analysis/stage2_4class_architecture_v0/encoder_only_ce/best.pt",
+  "canonical_baseline_metrics": "/workspace/project/analysis/stage2_4class_architecture_validation_eval_v0/metrics/encoder_only.json",
+  "output_root": "/workspace/project/analysis/stage2_encoder_only_4class_loss_phase3_v0",
+  "objectives": [
+    "weighted_ce",
+    "ce_ntl_was",
+    "representative_huber"
+  ],
+  "objective_directories": {
+    "weighted_ce": "weighted_ce",
+    "ce_ntl_was": "ce_ntl_was_lambda_0p3",
+    "representative_huber": "representative_huber_delta14"
+  },
+  "ntl_was_lambda": 0.3,
+  "ntl_was_total_formula": "CE - 0.3 * NTL_WAS",
+  "huber_delta_cc64": 14,
+  "huber_delta_normalized": 0.11023622047244094,
+  "regression_midi_integer_conversion": "clip normalized scalar to [0,1], multiply by 127, round to nearest integer with half up, then canonical-bin",
+  "standard_ce_retrained": false,
+  "asap_test_access": 0,
+  "repedal_evaluated": false
+}

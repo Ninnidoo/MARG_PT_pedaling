@@ -82,3 +82,23 @@ wandb/
 # External source repositories
 # =========================================================
 third_party/PianistTransformer/
+# =========================================================
+# Curated research records
+# =========================================================
+# Keep generated analysis data local. Only human-readable reports and
+# publication-ready figures are candidates for GitHub. Files that were
+# already tracked remain tracked until explicitly removed from the index.
+analysis/**
+!analysis/**/
+!analysis/**/*.md
+!analysis/**/*.png
+!analysis/**/*.py
+!analysis/**/*.js
+!analysis/**/*.css
+!analysis/**/*.html
+!analysis/**/.gitkeep
+
+# Local scratch and interrupted-edit artifacts
+*.orig
+*.rej
+*.run.lock*

@@ -1,0 +1,17 @@
+{
+  "seed": 42,
+  "checkpoint": "checkpoints/pianist_transformer",
+  "train_manifest": "analysis/stage2_binary_v0/data_prep_v1/train_manifest.csv",
+  "asap_split_artifact": "analysis/stage2_encoder_only_v0/asap_split.csv",
+  "fixture_path": "Schubert/Piano_Sonatas/664-3/Lin07.mid",
+  "fixture_source": "ASAP-train",
+  "window_notes": 128,
+  "window_starts": [0, 256, 512, 768],
+  "batch_size": 2,
+  "max_steps": 40,
+  "encoder_lr": 0.0001,
+  "head_lr": 0.001,
+  "weight_decay": 0.0,
+  "max_grad_norm": 1.0,
+  "amp": true
+}

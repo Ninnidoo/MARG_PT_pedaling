@@ -1,0 +1,15 @@
+{
+  "seed": 42,
+  "asap_root": "/workspace/public/ASAP/asap-dataset-v1.1",
+  "asap_metadata": "/workspace/public/ASAP/asap-dataset-v1.1/metadata.csv",
+  "split_csv": "analysis/stage2_encoder_only_v0/asap_split.csv",
+  "prior_joint16_audit": "analysis/stage2_binary_v0/data_prep_v1/joint16_distribution_by_dataset.csv",
+  "stage1_checkpoint": "checkpoints/pianist_transformer",
+  "output_root": "analysis/stage2_binary_v0/validation_eval_v0",
+  "device": "cuda:0",
+  "torch_dtype": "float32",
+  "temperature": 1.0,
+  "top_p": 0.95,
+  "max_context_length": 4096,
+  "overlap_ratio": 0.5
+}

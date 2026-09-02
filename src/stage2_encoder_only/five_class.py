@@ -21,6 +21,21 @@ NUM_CLASSES = 5
 IGNORE_INDEX = -100
 
 
+def validate_class_weights(
+    class_weights: torch.Tensor | Sequence[float] | None,
+) -> torch.Tensor | None:
+    """Validate the single global five-class CE weight vector."""
+
+    if class_weights is None:
+        return None
+    weights = torch.as_tensor(class_weights, dtype=torch.float32)
+    if weights.ndim != 1 or weights.numel() != NUM_CLASSES:
+        raise ValueError("class weights must have shape [5]")
+    if not bool(torch.isfinite(weights).all()) or bool(torch.any(weights <= 0)):
+        raise ValueError("class weights must be finite and strictly positive")
+    return weights
+
+
 def _validate_integer_array(values: np.ndarray | torch.Tensor, name: str) -> None:
     if values.ndim < 1 or values.shape[-1] != PEDAL_SLOTS:
         raise ValueError(f"{name} must have shape [..., 4]")
@@ -175,7 +190,18 @@ class FiveClassPedalEncoderModel(nn.Module):
         self.classification_heads = nn.ModuleList(
             [nn.Linear(self.hidden_size, NUM_CLASSES) for _ in range(PEDAL_SLOTS)]
         )
+        # Non-persistent keeps legacy unweighted checkpoints byte-compatible.
+        self.register_buffer("class_weights", torch.ones(NUM_CLASSES), persistent=False)
         self.set_encoder_frozen(freeze_encoder)
+
+    def set_class_weights(self, class_weights: torch.Tensor | Sequence[float] | None) -> None:
+        """Set one shared CE vector for all four independent pedal heads."""
+
+        weights = validate_class_weights(class_weights)
+        if weights is None:
+            self.class_weights.fill_(1.0)
+        else:
+            self.class_weights.copy_(weights.to(self.class_weights.device))
 
     @classmethod
     def from_pretrained(
@@ -200,13 +226,20 @@ class FiveClassPedalEncoderModel(nn.Module):
             parameter.requires_grad_(not freeze)
 
     @staticmethod
-    def compute_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    def compute_loss(
+        logits: torch.Tensor,
+        targets: torch.Tensor,
+        class_weights: torch.Tensor | Sequence[float] | None = None,
+    ) -> torch.Tensor:
+        weights = validate_class_weights(class_weights)
+        if weights is not None:
+            weights = weights.to(device=logits.device, dtype=logits.dtype)
         return F.cross_entropy(
             logits.reshape(-1, NUM_CLASSES),
             targets.reshape(-1),
             ignore_index=IGNORE_INDEX,
+            weight=weights,
         )
-
     def forward(
         self,
         input_ids: torch.Tensor,
@@ -246,5 +279,9 @@ class FiveClassPedalEncoderModel(nn.Module):
         logits = torch.stack([head(dropped) for head in self.classification_heads], dim=2)
         if logits.shape != (batch_size, note_count, PEDAL_SLOTS, NUM_CLASSES):
             raise RuntimeError("five-class logits have an invalid shape")
-        loss = self.compute_loss(logits, pedal_targets) if pedal_targets is not None else None
+        loss = (
+            self.compute_loss(logits, pedal_targets, self.class_weights)
+            if pedal_targets is not None
+            else None
+        )
         return FiveClassPedalOutput(logits=logits, loss=loss, hidden_states=hidden)

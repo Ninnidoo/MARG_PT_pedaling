@@ -1,0 +1,18 @@
+{
+  "experiment_id": "stage2_encoder_only_raw_cc64_huber_v0",
+  "canonical_config": "/workspace/project/configs/stage2_4class_architecture_v0.json",
+  "representative_huber_root": "/workspace/project/analysis/stage2_encoder_only_4class_loss_phase3_v0/representative_huber_delta14",
+  "representative_huber_evaluation": "/workspace/project/analysis/stage2_encoder_only_4class_loss_phase3_v0/representative_huber_delta14/validation/evaluation.json",
+  "representative_validation_alignment_cache": "/workspace/project/analysis/stage2_encoder_only_4class_loss_phase3_v0/canonical_validation_alignment_cache",
+  "output_root": "/workspace/project/analysis/stage2_encoder_only_raw_cc64_huber_v0",
+  "objective": "raw_cc64_huber",
+  "target_pipeline": "canonical cached raw Pedal1-4 CC64 integer -> divide by 127; no class or representative mapping",
+  "huber_delta_cc64": 14,
+  "huber_delta_normalized": 0.11023622047244094,
+  "inference_conversion": "clip normalized scalar to [0,1], multiply by 127, round to nearest integer with half up, then canonical-bin",
+  "checkpoint_selection": "minimum_validation_raw_cc64_huber",
+  "representative_checkpoint_used_for_initialization": false,
+  "standard_ce_retrained": false,
+  "asap_test_access": 0,
+  "repedal_evaluated": false
+}

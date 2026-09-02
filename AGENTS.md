@@ -263,6 +263,27 @@ pedal-heavy examples. Do not interpret exploratory pedal metrics as final
 research conclusions or start model training before the target and dataset
 scope are clear.
 
+## Canonical Stage 1 and Pedal-Only Test Invariant
+
+- The canonical ASAP test Stage 1 performances are the existing CPU/seed-42
+  Original Pianist Transformer MIDI files at
+  `outputs/midi/{num}_original_pt.mid`. Never regenerate them for an ASAP test
+  experiment; every current and future Stage 2 pedal model must share their
+  exact non-pedal performance.
+- A Stage 2 test candidate may change sustain-pedal CC64 events only. Relative
+  to its canonical MIDI, note count/order, pitch, onset, offset/duration,
+  velocity, ticks per beat, tempo, program/instrument/channel layout, time and
+  key signatures, pitch bends, markers/lyrics, every non-CC64 controller, and
+  every other renderer-relevant MIDI/meta event (including end-of-track
+  timing) must remain exactly identical.
+- Do not create canonical test candidates by reconstructing a full MIDI from
+  Stage 2 tokens. Preserve the canonical MIDI as the source of truth and
+  transplant only the predicted CC64 schedule from the established PT MIDI
+  conversion path.
+- Before any full evaluation, hard-assert strict non-CC64 equality. Stop before
+  metrics or reports if it fails. This invariant applies to every Stage 2 pedal
+  experiment, not only binary two-class models.
+
 For every experiment, record seed, input, model commit, checkpoint, generation
 parameters, runtime, output path, and relevant pedal metrics.
 

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Structural Bass Blind Annotation</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">MIDI-ONLY · BLIND REVIEW</p>
+        <h1>Structural Bass Annotation</h1>
+      </div>
+      <div id="progress" class="progress" aria-live="polite"></div>
+    </header>
+
+    <section class="instructions" aria-labelledby="instruction-title">
+      <h2 id="instruction-title">판단 질문</h2>
+      <p class="question">이 저음은 반복적인 accompaniment pattern의 한 구성음인가, 아니면 한 번 attack된 뒤 그 위의 더 작은 음악적 움직임을 구조적으로 받쳐주는 bass인가?</p>
+      <div class="definitions">
+        <p><strong>Structural Bass</strong><span>낮은 음이 한 번 attack된 뒤, 그 위에서 더 작은 음악적 움직임이 진행되는 동안 구조적 기반 역할을 하는 경우.</span></p>
+        <p><strong>Not Structural Bass</strong><span>반복적인 accompaniment pattern의 일부이거나, 단순히 낮은 음일 뿐 큰 음악적 단위를 지탱하는 bass로 보기 어려운 경우.</span></p>
+        <p><strong>Ambiguous</strong><span>현재 MIDI context만으로 두 경우를 안정적으로 구분하기 어려운 경우.</span></p>
+      </div>
+      <p class="warning">Pedal 사용의 적절성을 평가하는 단계가 아닙니다. 현재 음이 structural bass인지 여부만 판단하십시오.</p>
+    </section>
+
+    <section id="landing" class="landing">
+      <h2>Annotation set 선택</h2>
+      <p>연구 진행 순서상 Set A를 먼저 완료하십시오. Set B의 진행 상황은 별도로 저장됩니다.</p>
+      <div class="set-buttons">
+        <button type="button" class="set-button primary" data-set="A">Annotate Set A <span id="landing-progress-A">0 / 50</span></button>
+        <button type="button" class="set-button" data-set="B">Annotate Set B <span id="landing-progress-B">0 / 50</span></button>
+      </div>
+    </section>
+
+    <section id="review" class="review" hidden>
+      <div class="candidate-heading">
+        <div>
+          <p id="candidate-position" class="candidate-position"></p>
+          <h2 id="piece-title"></h2>
+          <p id="candidate-pitch" class="candidate-pitch"></p>
+        </div>
+        <button id="back-to-sets" class="quiet-button" type="button">Set 선택으로</button>
+      </div>
+
+      <figure class="piano-roll-card" aria-labelledby="plot-caption">
+        <svg id="piano-roll" viewBox="0 0 1120 530" role="img" aria-labelledby="plot-title plot-description"></svg>
+        <figcaption id="plot-caption">가운데의 붉은 세로선은 candidate onset입니다. 붉은 원은 candidate의 lowest newly-attacked pitch입니다.</figcaption>
+      </figure>
+
+      <label class="comment-label" for="comment">Optional comment</label>
+      <textarea id="comment" rows="2" placeholder="필요한 경우에만 메모를 남기세요."></textarea>
+      <p id="save-status" class="save-status" aria-live="polite"></p>
+
+      <div class="annotation-buttons" aria-label="Annotation choices">
+        <button type="button" data-label="STRUCTURAL_BASS" class="label-button structural"><kbd>1</kbd> Structural Bass</button>
+        <button type="button" data-label="NOT_STRUCTURAL_BASS" class="label-button not-structural"><kbd>2</kbd> Not Structural Bass</button>
+        <button type="button" data-label="AMBIGUOUS" class="label-button ambiguous"><kbd>3</kbd> Ambiguous</button>
+      </div>
+
+      <div class="navigation">
+        <button id="previous" type="button" class="nav-button">← Previous</button>
+        <span id="keyboard-help">Shortcuts: 1 / 2 / 3 · ← / →</span>
+        <button id="next" type="button" class="nav-button">Next →</button>
+      </div>
+      <a id="export" class="export-button" href="/api/export?set=A" download>Export annotations</a>
+    </section>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>

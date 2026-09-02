@@ -68,6 +68,7 @@ SYNTHETIC_TEST_MODULES = (
     "test_stage2_train.py",
     "test_stage2_evaluate.py",
     "test_stage2_five_class_audit.py",
+    "test_stage2_weighted_five_class.py",
 )
 
 
@@ -864,6 +865,15 @@ def render_training_report(
     )
     confusion = {key: value for key, value in five.items() if "confusion" in key or "collapse" in key}
     assessment = evaluation.get("success_assessment", {"status": "미확인"})
+    unweighted_baseline: dict[str, Any] = {}
+    if configuration.get("loss_configuration", {}).get("name") == "class_weighted_cross_entropy_inverse_sqrt_train_global":
+        baseline_csv = PROJECT_ROOT / "analysis" / "stage2_encoder_only_5class_v0" / "validation" / "validation_comparison.csv"
+        if baseline_csv.is_file():
+            with baseline_csv.open(newline="", encoding="utf-8") as handle:
+                for row in csv.DictReader(handle):
+                    if row.get("model") == "endpoint_aware_5class_argmax":
+                        unweighted_baseline = dict(row)
+                        break
     report = f"""# Stage 2 Encoder-only Endpoint-aware 5-class Pedal Training v0
 
 ## 1. 연구 질문과 가설
@@ -898,7 +908,9 @@ CC64 sustain threshold 미만의 nonzero physical pedal positions를 하나의 O
 
 ## 8. Loss와 decoding
 
-Loss는 valid note/slot 전체의 unweighted five-class cross-entropy이다. Final reconstruction은 raw logits window-average → one argmax → canonical representative 순서이며 smoothing/calibration은 없다.
+Loss configuration은 아래와 같으며, weighted run에서는 ASAP train Pedal1–4 global weight만 사용한다. Final reconstruction은 raw logits window-average → one argmax → canonical representative 순서이며 smoothing/calibration은 없다.
+
+{_format_json(configuration.get('loss_configuration', {'status': '미확인'}))}
 
 ## 9. Implementation tests
 
@@ -967,6 +979,18 @@ Primary reference:
 {_format_json(primary or {'status': '미확인'})}
 
 New five-class:
+
+{_format_json(five or {'status': '미확인'})}
+
+### Existing unweighted five-class baseline comparison
+
+기존 baseline checkpoint를 재학습하지 않고, 동일한 validation aggregate CSV의 `endpoint_aware_5class_argmax` row를 참조했다.
+
+Existing unweighted five-class:
+
+{_format_json(unweighted_baseline or {'status': 'baseline CSV row not found'})}
+
+Current weighted five-class:
 
 {_format_json(five or {'status': '미확인'})}
 
@@ -1041,6 +1065,11 @@ def run(output_dir: str | Path) -> int:
     )
 
     output = Path(output_dir).resolve()
+    report_name = os.environ.get("STAGE2_REPORT_NAME", REPORT_NAME)
+    overrides_text = os.environ.get("STAGE2_CONFIGURATION_OVERRIDES_JSON")
+    configuration_overrides = json.loads(overrides_text) if overrides_text else {}
+    if not isinstance(configuration_overrides, Mapping):
+        raise ValueError("STAGE2_CONFIGURATION_OVERRIDES_JSON must be a JSON object")
     output.parent.mkdir(parents=True, exist_ok=True)
     host_pid = _parse_optional_pid(
         os.environ.get("STAGE2_HOST_PID") or os.environ.get("HOST_PID")
@@ -1119,6 +1148,7 @@ def run(output_dir: str | Path) -> int:
                     configuration["resume"] = str(resume_path)
                 else:
                     configuration = dict(base)
+                    configuration.update(configuration_overrides)
                 split_path = Path(configuration.get("split_csv", DEFAULT_SPLIT_CSV)).resolve()
                 split = _split_metadata(split_path)
                 git = collect_git_metadata(PROJECT_ROOT)
@@ -1203,6 +1233,7 @@ def run(output_dir: str | Path) -> int:
                     epoch_callback=epoch_callback,
                     progress_callback=progress_callback,
                 )
+                configuration = json.loads((output / "config.json").read_text(encoding="utf-8"))
                 training_end_time_utc = utc_now()
                 training_end_time_kst = kst_now()
                 training = dict(training)
@@ -1250,7 +1281,7 @@ def run(output_dir: str | Path) -> int:
                 report = render_training_report(
                     configuration, tests, train_oracle, overfit, training, evaluation
                 )
-                atomic_text(output / REPORT_NAME, report)
+                atomic_text(output / report_name, report)
                 required = [
                     output / "config.json", output / STATUS_NAME, log_path,
                     output / "metrics.csv", output / "last.pt", output / "best.pt",
@@ -1267,7 +1298,7 @@ def run(output_dir: str | Path) -> int:
                     output / "validation" / "canonical_quantization_gap.json",
                     output / "validation" / "error_quantiles.json",
                     output / "validation" / "reference_rebinned_metrics.csv",
-                    output / REPORT_NAME,
+                    output / report_name,
                 ]
                 missing = [str(path) for path in required if not path.is_file() or path.stat().st_size == 0]
                 if missing:
@@ -1349,11 +1380,14 @@ def run(output_dir: str | Path) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
+    parser.add_argument("--report-name", default=None)
     return parser.parse_args()
 
 
 def main() -> int:
     arguments = parse_args()
+    if arguments.report_name:
+        os.environ["STAGE2_REPORT_NAME"] = arguments.report_name
     return run(arguments.output_dir)
 
 

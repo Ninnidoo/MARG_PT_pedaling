@@ -189,3 +189,24 @@ Verified on 2026-07-28:
 - synthetic tests: 11 passed
 - output: `analysis/stage2_pedal_target_audit/`
 - full report: `analysis/stage2_pedal_target_audit/summary.md`
+
+## Structural Bass Blind Annotation v0
+
+Serve the existing 100-candidate, MIDI-only blind annotation page from the
+development container (CPU-only), then forward port 8765 in VS Code and open
+`http://localhost:8765`:
+
+```bash
+docker exec -it ilkyun-marg-pedaling-dev python /workspace/project/scripts/serve_structural_bass_annotation.py --host 0.0.0.0 --port 8765
+```
+
+Verified smoke test on 2026-08-25:
+
+```bash
+docker exec -e CUDA_VISIBLE_DEVICES='' ilkyun-marg-pedaling-dev python -m unittest tests.test_structural_bass_annotation_v0 -v
+```
+
+The persistent result file is
+`analysis/structural_bass_annotation_v0/annotation_results.csv`. See
+`analysis/structural_bass_annotation_v0/README.md` for shortcuts, export, and
+blind/hidden-data separation.

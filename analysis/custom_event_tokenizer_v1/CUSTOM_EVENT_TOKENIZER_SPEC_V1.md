@@ -1,0 +1,21 @@
+# Custom Event Tokenizer Specification v1 (Frozen)
+
+- Cache ID: `3a5520155b5db1e9a1da7f8148556aa3e1da852655c9adde25d3dbbd1d966263`
+- Implementation version: `1.0.1`
+- Raw provenance: canonical original human-performance MIDI CC64 timestamp/value events only.
+- States: ZERO 0–25, LOW 26–63, HALF 64–103, FULL 104–127; representatives `[0,51,79,127]`.
+- Initial: state immediately before first distinct onset; strict `< first onset`; default ZERO.
+- Vocabulary: `NONE / SET_ZERO / SET_LOW / SET_HALF / SET_FULL`; same-state raw changes suppressed.
+- Same timestamp: v0 deterministic `(tick,track,message_index)`, last effective state; no new ordering token.
+- Main intervals: nonterminal `[t_i,t_(i+1))`; final main interval `[t_M, latest note-off]` inclusive.
+- Main capacity: K=6, chronological final six on overflow; final state preserved exactly.
+- Main target timing: exact tau; nonterminal `[0,1)`, final `[0,1]`; predicted tau is clipped to `[0,1]` by decoder.
+- Terminal: events strictly after latest note-off; K_T=4, chronological final four.
+- Terminal timing: retained first gap is re-anchored to latest note-off, later gaps are inter-event; target `log1p(gap_seconds)`.
+- Terminal decoder: clamp predicted z to `>=0`, apply `expm1`, cumulatively sum from latest note-off.
+- Note order: `(onset,pitch,track,channel,noteoff,velocity)`; onset representative is its last note index.
+- Onset groups use complete non-drum notes. A malformed unmatched note-on has no model note representation and is excluded with an explicit cache diagnostic.
+- Cache scope: one global piece-level initial target and one terminal target set; no window ownership semantics.
+- Event targets are always valid; timing targets are valid iff event != NONE. Finite zero placeholders must never be consumed without the stored mask.
+- Known limitation: ~2.3617% effective events exactly on onset and 193 cross-track/interleaved ambiguous cases from prior audit.
+- ASAP test access: zero. Repedal: zero.

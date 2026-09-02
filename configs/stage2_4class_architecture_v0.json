@@ -1,0 +1,70 @@
+{
+  "experiment_id": "stage2_4class_architecture_v0",
+  "output_root": "/workspace/project/analysis/stage2_4class_architecture_v0",
+  "cache_root": "/workspace/project/analysis/stage2_binary_v0/train_setup_v0/shared_cache",
+  "train_manifest": "/workspace/project/analysis/stage2_binary_v0/data_prep_v1/train_manifest.csv",
+  "checkpoint_path": "/workspace/project/checkpoints/pianist_transformer",
+  "expected_cache_id": "85a79e9d10e955b10000f72f6bbc4a29dbd2cc5a4c8cfb1277054a8d45dcb877",
+  "expected_cache_sha256": {
+    "cache_statistics.json": "ca3eced20fde9d5cb54e29757b324a35645ed173e0d6fc957f9513d281a8de54",
+    "train_tokens_int16.npy": "499e0ee216c141f9038961e2c6d6691732fbd17a489999030d0dc7db171e76ba",
+    "train_windows_int32.npy": "1e1f7b609138c83fed2d2dd05d40695a5c7a25f4c5574559cb54b8c63d8e28e1",
+    "validation_tokens_int16.npy": "d8b42a599ba271cab70e3a97f70e5007bf6e2a80b7c302cf6b6318e61e53f2b6",
+    "validation_windows_int32.npy": "a4412f3788e9f003fb7562f4f44b188d92ca0ccfa719c1b1fd33b51ab94f9434",
+    "train_performance_index.csv": "83e0180fb72250c4324c6cb081c20dd411aed2549d2f6f414d43084725d5f4a7",
+    "validation_performance_index.csv": "5761b222607aa78435b86f4042ef0b729cddd960601697c5d94cb0a88b40ac47"
+  },
+  "expected_pretrained_sha256": "8fb9111efc147adcc61a4885bd42a6e6b625626d9fb8576811916927aa8281d0",
+  "expected_initial_encoder_sha256": "3d6af38359042962e850fd4afeaedd9ad248266d99f1d2d31e3ab7bbec53aaed",
+  "expected_gpu_uuid": "GPU-6982dbee-fbaf-f359-d7ef-a22d0e83400b",
+  "seed": 42,
+  "decoder_init_seed": 42,
+  "decoder_only_init_seed": 42,
+  "decoder_only_num_layers": 2,
+  "class_names": ["ZERO", "LOW", "HALF", "FULL"],
+  "class_boundaries": [[0, 25], [26, 63], [64, 103], [104, 127]],
+  "representatives": [0, 51, 79, 127],
+  "representative_usage": "MIDI decoding and diagnostics only",
+  "loss": "standard_unweighted_cross_entropy",
+  "class_weighting": null,
+  "scheduled_sampling": false,
+  "future_decoding": "argmax",
+  "checkpoint_selection": "minimum_validation_ce",
+  "teacher_forced_validation_comparability_note": "checkpoint selection only; do not compare teacher-forced accuracy directly with encoder-only",
+  "window_notes": 512,
+  "stride_notes": 256,
+  "effective_batch_size": 16,
+  "micro_batch_size": {
+    "encoder_only": 16,
+    "encoder_decoder": 4,
+    "decoder_only": 4
+  },
+  "gradient_accumulation_steps": {
+    "encoder_only": 1,
+    "encoder_decoder": 4,
+    "decoder_only": 4
+  },
+  "optimizer": "AdamW",
+  "encoder_lr": 0.00001,
+  "head_lr": 0.0001,
+  "weight_decay": 0.01,
+  "max_grad_norm": 1.0,
+  "amp_enabled": true,
+  "amp_init_scale": 1024.0,
+  "pin_memory": true,
+  "num_workers": 0,
+  "scheduler": null,
+  "max_epochs": 10,
+  "early_stopping_patience": 3,
+  "early_stopping_min_delta": 0.0001,
+  "progress_interval": 100,
+  "training_data": {
+    "MAESTRO-clean": 1170,
+    "ASAP-train": 892
+  },
+  "validation_data": {
+    "ASAP-validation": 71
+  },
+  "asap_test_access": 0,
+  "controlled_common_settings_source": "canonical combined Stage 2 cache/training v1; effective batch and optimizer settings shared across architectures"
+}
